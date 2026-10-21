@@ -17,46 +17,45 @@ ul{padding-left:20px}
 </style>
 </head>
 <body>
-<h1>Make the AR target file</h1>
-<p>Open this page on a laptop after uploading the card images into the <b>targets</b> folder. It checks every image, then builds <b>targets.mind</b> and downloads it. Upload that file to the main folder of your repository.</p>
+<h1>Make the AR target files</h1>
+<p>Open this page on a laptop. It builds <b>three</b> files, one each for postcards, bookmarks and stickers, so the scanner never mixes a bookmark up with a postcard. Upload all three to the main folder of your repository.</p>
 <ul id="list"></ul>
-<button id="go" type="button" disabled>Build targets.mind</button>
+<button id="go" type="button" disabled>Build the 3 target files</button>
 <div id="bar"><div></div></div>
 <p id="msg"></p>
 <script>
 (function () {
-  var T = window.DPAR.TARGETS, list = document.getElementById('list'), btn = document.getElementById('go'), imgs = [], ok = 0;
+  var T = window.DPAR.TARGETS, list = document.getElementById('list'), btn = document.getElementById('go'), imgs = {}, ok = 0;
   T.forEach(function (t, i) {
-    var li = document.createElement('li'); li.textContent = (i + 1) + '. targets/' + t.file + ' … checking'; list.appendChild(li);
-    var folders = ['targets', 'targets-images'], f = 0;
-    var im = new Image(); im.onload = function () { li.textContent = (i + 1) + '. ' + folders[f] + '/' + t.file + ' ✓'; li.className = 'ok'; ok++; if (ok === T.length) btn.disabled = false; };
-    im.onerror = function () {
-      f++; if (f < folders.length) { im.src = './' + folders[f] + '/' + t.file; return; }
-      li.textContent = (i + 1) + '. ' + t.file + ' ✗ missing'; li.className = 'bad';
-    };
-    im.src = './' + folders[0] + '/' + t.file; imgs[i] = im;
+    var li = document.createElement('li'); li.textContent = t.set + ': targets/' + t.file + ' … checking'; list.appendChild(li);
+    var im = new Image(); im.onload = function () { li.textContent = t.set + ': targets/' + t.file + ' ✓'; li.className = 'ok'; ok++; if (ok === T.length) btn.disabled = false; };
+    im.onerror = function () { li.textContent = t.set + ': targets/' + t.file + ' ✗ missing'; li.className = 'bad'; };
+    im.src = './targets/' + t.file; imgs[t.file] = im;
   });
   btn.addEventListener('click', async function () {
-    btn.disabled = true; var msg = document.getElementById('msg'); msg.textContent = 'Building… keep this tab open (about 2–5 minutes).';
-    var MAX = 480;
-    var small = imgs.map(function (im) {
-      var s = Math.min(1, MAX / Math.max(im.naturalWidth, im.naturalHeight));
-      var c = document.createElement('canvas'); c.width = Math.round(im.naturalWidth * s); c.height = Math.round(im.naturalHeight * s);
-      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return c;
-    });
-    var start = Date.now();
+    btn.disabled = true; var msg = document.getElementById('msg'), MAX = 480, done = [];
     try {
-    msg.textContent = 'Loading the build tool…';
-    var mod = await import('https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js');
-    var compiler = new mod.Compiler();
-    msg.textContent = 'Building… 0%. Keep this tab open.';
-    await compiler.compileImageTargets(small, function (p) {
-      document.querySelector('#bar div').style.width = p.toFixed(0) + '%';
-      msg.textContent = 'Building… ' + p.toFixed(0) + '% (' + Math.round((Date.now() - start) / 1000) + ' s). Keep this tab open.';
-    });
-    var buf = await compiler.exportData();
-    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([buf])); a.download = 'targets.mind'; a.click();
-    msg.textContent = 'Done! targets.mind (' + (buf.byteLength / 1048576).toFixed(1) + ' MB) downloaded. Upload it to the main folder of your repository.';
+      msg.textContent = 'Loading the build tool…';
+      var mod = await import('https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js');
+      var sets = ['cards', 'bookmarks', 'stickers'];
+      for (var k = 0; k < sets.length; k++) {
+        var set = sets[k], start = Date.now();
+        var small = window.DPAR.targetsOf(set).map(function (t) {
+          var im = imgs[t.file], s = Math.min(1, MAX / Math.max(im.naturalWidth, im.naturalHeight));
+          var c = document.createElement('canvas'); c.width = Math.round(im.naturalWidth * s); c.height = Math.round(im.naturalHeight * s);
+          c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return c;
+        });
+        var compiler = new mod.Compiler();
+        await compiler.compileImageTargets(small, function (p) {
+          document.querySelector('#bar div').style.width = ((k + p / 100) / sets.length * 100).toFixed(0) + '%';
+          msg.textContent = 'Building ' + set + ' (' + (k + 1) + ' of 3)… ' + p.toFixed(0) + '% (' + Math.round((Date.now() - start) / 1000) + ' s). Keep this tab open.';
+        });
+        var buf = await compiler.exportData();
+        var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([buf])); a.download = 'targets-' + set + '.mind'; document.body.appendChild(a); a.click(); a.remove();
+        done.push('targets-' + set + '.mind (' + (buf.byteLength / 1048576).toFixed(1) + ' MB)');
+        await new Promise(function (r) { setTimeout(r, 800); });
+      }
+      msg.textContent = 'Done! Downloaded: ' + done.join(', ') + '. Upload all three to the main folder of your repository. If your browser asked, allow multiple downloads.';
     } catch (e) { msg.textContent = 'Error: ' + (e && e.message ? e.message : e) + ' (send a screenshot of this)'; msg.style.color = '#b3261e'; btn.disabled = false; }
   });
 })();
