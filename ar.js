@@ -963,7 +963,22 @@
     else { rr(ctx, -e, -e, T.w + 2 * e, T.h + 2 * e, 10); ctx.stroke(); }
     ctx.restore();
   }
+  /* white postcard/bookmark border: art is scaled into the inner box, exactly as printed */
+  function frameOf(T) {
+    if (T.w === T.h) return null;
+    var bm = T.w < T.h * 0.5, b = bm ? 1.5 * T.h / 150 : 2 * Math.min(T.w, T.h) / 105;
+    var iw = T.w - 2 * b, ih = T.h - 2 * b, s = Math.max(iw / T.w, ih / T.h);
+    return { b: b, s: s, ox: b - (T.w * s - iw) / 2, oy: b - (T.h * s - ih) / 2, iw: iw, ih: ih };
+  }
+  var SIGPOS = {"moon.png": [333.44, 510.78, 48.0], "csmt.png": [495.44, 348.78, 48.0], "diwali.png": [495.44, 348.78, 48.0], "christmas.png": [495.44, 348.78, 48.0], "newyear.png": [495.44, 348.78, 48.0], "torii-portrait.png": [333.44, 510.78, 48.0], "torii-landscape.png": [495.44, 348.78, 48.0], "marine.png": [495.44, 348.78, 48.0], "csmt-hindi.png": [495.44, 348.78, 48.0], "winter.png": [495.44, 348.78, 48.0], "village-life.png": [333.44, 510.78, 48.0], "monsoon.png": [333.44, 510.78, 48.0], "village-hut.png": [333.44, 510.78, 48.0], "bookmark-sakura.png": [140.83, 529.86, 34.5], "bookmark-village.png": [140.83, 529.86, 34.5]}, SIGIMG = new Image(); SIGIMG.src = 'assets/signature.png';
   function drawAll(ctx, t, st, T) {
+    var F = frameOf(T);
+    if (F) { ctx.save(); ctx.beginPath(); ctx.rect(F.b, F.b, F.iw, F.ih); ctx.clip(); ctx.translate(F.ox, F.oy); ctx.scale(F.s, F.s); }
+    drawCore(ctx, t, st, T);
+    if (F) ctx.restore();
+    var sp = SIGPOS[T.file]; if (sp && SIGIMG.complete && SIGIMG.naturalWidth) ctx.drawImage(SIGIMG, sp[0], sp[1], sp[2], sp[2] * SIGIMG.naturalHeight / SIGIMG.naturalWidth);
+  }
+  function drawCore(ctx, t, st, T) {
     if (ANIMS[T.anim].plate) {
       ANIMS[T.anim].draw(ctx, t, st, T.w, T.h, T.m, T);
       if (T.fx && T.fx.water) water(ctx, t, st, T.fx.water);
@@ -972,8 +987,6 @@
       if (EXTRA[T.anim]) EXTRA[T.anim](ctx, t, st, T.w, T.h, T.m);
       ANIMS[T.anim].draw(ctx, t, st, T.w, T.h, T.m);
     }
-    if (T.fx && T.fx.glitter) glitter(ctx, t, st, T.w, T.h, T.m, T.fx.glitter);
-    popIn(ctx, t, T);
   }
 
   /* ---------------- A-Frame wiring: one site, two modes (flat overlay / 3D pop-up window) ---------------- */
