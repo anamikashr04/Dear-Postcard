@@ -14,7 +14,7 @@
     { file: 'sticker-mumbai.png',   w: 284, h: 284, m: 70,  anim: 'stickerMumbai', fx: { glitter: { n: 26, cols: ['#FFFFFF', '#FFE27A', '#FF7AA2'] } } },
     { file: 'sticker-navi.png',     w: 284, h: 284, m: 70,  anim: 'stickerNavi', fx: { glitter: { n: 26, cols: ['#FFFFFF', '#FFE27A', '#8FDCCB'] } } },
     { file: 'sticker-cat.png',      w: 284, h: 284, m: 80,  anim: 'cat', fx: { glitter: { n: 30, cols: ['#FFFFFF', '#FFC2DA', '#FFE27A'] } } },
-    { file: 'sticker-fah.png',      w: 284, h: 284, m: 90,  anim: 'fah', fx: { glitter: { n: 24, cols: ['#FFFFFF', '#FFE27A'] } } },
+    { file: 'sticker-fah.png',      w: 284, h: 284, m: 90,  anim: 'fah', sound: 'fah', fx: { glitter: { n: 24, cols: ['#FFFFFF', '#FFE27A'] } } },
     { file: 'marine.png',           w: 559, h: 397, m: 40,  anim: 'marine', fx: { water: { x0: 0, x1: 559, y0: 253, y1: 312, mx: 300, col: '255,200,130' }, glitter: { n: 40, cols: ['#FFF3DC', '#FFD66B', '#FFFFFF'] } } },
     { file: 'csmt-hindi.png',       w: 559, h: 397, m: 40,  anim: 'csmtHindi', fx: { glitter: { n: 30, cols: ['#FFFFFF', '#FFE27A', '#FF7AA2'] } } },
     { file: 'sticker-designer.png', w: 284, h: 284, m: 70,  anim: 'stickerDesigner', fx: { glitter: { n: 28, cols: ['#FFFFFF', '#FFC93C', '#5CE1D8', '#FF7AA2'] } } },
@@ -964,6 +964,28 @@
     ctx.restore();
   }
   /* white postcard/bookmark border: art is scaled into the inner box, exactly as printed */
+  /* living card: the printed image itself ripples (water) and sways (leaves, lanterns) */
+  var LIVE = {"moon.png": {"w": [[8, 405, 389, 498, 3.2]], "s": [[248, 8, 389, 472, 322, 472, 0.9]]}, "torii-portrait.png": {"w": [[40, 422, 332, 520, 3]], "s": [[8, 8, 178, 382, 8, 382, 1.1], [268, 58, 389, 402, 389, 402, 1.1]]}, "torii-landscape.png": {"w": [[70, 300, 498, 386, 3]], "s": [[8, 8, 245, 302, 8, 302, 1.0], [478, 118, 551, 322, 551, 322, 1.2]]}, "marine.png": {"w": [[8, 248, 551, 300, 2.6]], "s": []}, "bookmark-sakura.png": {"w": [[8, 455, 181, 522, 2.4]], "s": [[8, 8, 95, 95, 8, 8, 1.6]]}, "diwali.png": {"w": [], "s": [[38, 22, 102, 136, 70, 24, 4], [466, 22, 528, 126, 497, 24, 4]]}};
+  function livePlate(ctx, t, T) {
+    var L = LIVE[T.file]; if (!L) return;
+    var im = img('targets/' + T.file); if (!im) return;
+    var k = im.naturalWidth / T.w;
+    L.w.forEach(function (r) {
+      ctx.save(); ctx.beginPath(); ctx.rect(r[0], r[1], r[2] - r[0], r[3] - r[1]); ctx.clip();
+      for (var y = r[1]; y < r[3]; y += 1.5) {
+        var q = (y - r[1]) / (r[3] - r[1]), off = r[4] * (0.35 + 0.65 * q) * Math.sin(t * 1.7 + y * 0.42) + r[4] * 0.45 * Math.sin(t * 0.8 + y * 0.13);
+        ctx.drawImage(im, (r[0] - 6) * k, y * k, (r[2] - r[0] + 12) * k, 1.6 * k, r[0] - 6 + off, y, r[2] - r[0] + 12, 1.6);
+      }
+      ctx.restore();
+    });
+    L.s.forEach(function (r, i) {
+      var a = r[6] * Math.PI / 180 * (Math.sin(t * 0.9 + i * 1.7) * 0.75 + Math.sin(t * 2.1 + i) * 0.25);
+      ctx.save(); ctx.beginPath(); ctx.rect(r[0] - 6, r[1] - 6, r[2] - r[0] + 12, r[3] - r[1] + 12); ctx.clip();
+      ctx.translate(r[4], r[5]); ctx.rotate(a); ctx.translate(-r[4], -r[5]);
+      ctx.drawImage(im, r[0] * k, r[1] * k, (r[2] - r[0]) * k, (r[3] - r[1]) * k, r[0], r[1], r[2] - r[0], r[3] - r[1]);
+      ctx.restore();
+    });
+  }
   function frameOf(T) {
     if (T.w === T.h) return null;
     var bm = T.w < T.h * 0.5, b = bm ? 1.5 * T.h / 150 : 2 * Math.min(T.w, T.h) / 105;
@@ -973,10 +995,13 @@
   var SIGPOS = {"moon.png": [333.44, 510.78, 48.0], "csmt.png": [495.44, 348.78, 48.0], "diwali.png": [495.44, 348.78, 48.0], "christmas.png": [495.44, 348.78, 48.0], "newyear.png": [495.44, 348.78, 48.0], "torii-portrait.png": [333.44, 510.78, 48.0], "torii-landscape.png": [495.44, 348.78, 48.0], "marine.png": [495.44, 348.78, 48.0], "csmt-hindi.png": [495.44, 348.78, 48.0], "winter.png": [495.44, 348.78, 48.0], "village-life.png": [333.44, 510.78, 48.0], "monsoon.png": [333.44, 510.78, 48.0], "village-hut.png": [333.44, 510.78, 48.0], "bookmark-sakura.png": [140.83, 529.86, 34.5], "bookmark-village.png": [140.83, 529.86, 34.5]}, SIGIMG = new Image(); SIGIMG.src = 'assets/signature.png';
   function drawAll(ctx, t, st, T) {
     var F = frameOf(T);
-    if (F) { ctx.save(); ctx.beginPath(); ctx.rect(F.b, F.b, F.iw, F.ih); ctx.clip(); ctx.translate(F.ox, F.oy); ctx.scale(F.s, F.s); }
+    if (F) { ctx.save(); ctx.beginPath(); ctx.rect(F.b, F.b, F.iw, F.ih); ctx.clip(); livePlate(ctx, t, T); ctx.translate(F.ox, F.oy); ctx.scale(F.s, F.s); }
     drawCore(ctx, t, st, T);
-    if (F) ctx.restore();
+    if (F) { ctx.restore(); ctx.save(); ctx.beginPath(); ctx.rect(F.b, F.b, F.iw, F.ih); ctx.clip(); }
+    if (T.fx && T.fx.glitter) glitter(ctx, t, st, T.w, T.h, T.m, T.fx.glitter);
+    if (typeof popIn === 'function') popIn(ctx, t, T);
     var sp = SIGPOS[T.file]; if (sp && SIGIMG.complete && SIGIMG.naturalWidth) ctx.drawImage(SIGIMG, sp[0], sp[1], sp[2], sp[2] * SIGIMG.naturalHeight / SIGIMG.naturalWidth);
+    if (F) ctx.restore();
   }
   function drawCore(ctx, t, st, T) {
     if (ANIMS[T.anim].plate) {
@@ -1060,7 +1085,7 @@
           var pb = clamp01(t / 0.5), pw = clamp01((t - 0.35) / 1.05);
           this.base.scale.set(1, 1, Math.max(0.02, easeOutBack(pb)));
           this.base.position.z = 0.03 * Math.max(0.02, easeOutBack(pb));
-          this.hinge.rotation.x = 1.15 * easeOutBack(pw) + (pw >= 1 ? Math.sin(t * 1.1) * 0.04 : 0);
+          this.hinge.rotation.x = 0.8 * easeOutBack(pw) + (pw >= 1 ? Math.sin(t * 1.1) * 0.04 : 0);
           var sc = 0.55 + 0.45 * easeOutBack(pw); this.win.scale.set(sc, sc, sc);
           this.win.rotation.y = pw >= 1 ? Math.sin(t * 0.7) * 0.06 : 0;
           this.shadow.material.opacity = 0.25 * pw;
