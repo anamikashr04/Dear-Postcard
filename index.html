@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dear Postcard – AR</title>
+<script src="https://cdn.jsdelivr.net/npm/aframe@1.5.0/dist/aframe-master.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&amp;family=Caveat:wght@700&amp;display=swap">
+<script src="./sound.js"></script>
+<script src="./ar.js"></script>
+<style>
+html,body{margin:0;height:100%;background:transparent;font-family:system-ui,sans-serif;overflow:hidden}
+#start{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#1d1a3a;color:#fff7e8;text-align:center;padding:24px}
+#start h1{margin:0;font-size:28px;font-weight:700}
+#start p{margin:0;max-width:300px;line-height:1.5;opacity:.85}
+#start button{font:inherit;font-size:18px;font-weight:600;padding:14px 32px;border:0;border-radius:999px;background:#ffc93c;color:#1d1d1b}
+#scene-holder{position:fixed;top:0;left:0;width:100vw;height:100vh;overflow:hidden}
+#scene-holder video{object-fit:cover}
+#modes{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:15;display:flex;gap:4px;padding:4px;border-radius:999px;background:rgba(29,26,58,.75);backdrop-filter:blur(6px)}
+#modes button{font:inherit;font-size:15px;font-weight:600;min-height:44px;padding:0 18px;border:0;border-radius:999px;background:transparent;color:#fff7e8}
+#modes button[aria-pressed="true"]{background:#ffc93c;color:#1d1d1b}
+#sound{position:fixed;top:16px;right:16px;z-index:16;width:48px;height:48px;border:0;border-radius:999px;background:rgba(29,26,58,.75);color:#fff7e8;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+#sound svg{width:24px;height:24px}
+#hint{position:fixed;left:0;right:0;bottom:24px;z-index:10;text-align:center;color:#fff;font-size:15px;text-shadow:0 1px 4px #000;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="start">
+<h1>Dear Postcard</h1>
+<p>Point your camera at the front of your postcard or sticker and watch it come alive. Switch between <b>Normal</b> and <b>3D pop-up</b> at the top, and tap the speaker to turn sound on or off.</p>
+<button id="go" type="button">Start camera</button>
+<p style="font-size:13px">by Anamika Shrivastava</p>
+</div>
+<div id="modes" role="group" aria-label="AR style" hidden><button type="button" data-mode="flat">Normal</button><button type="button" data-mode="3d">3D pop-up</button></div>
+<button id="sound" type="button" aria-label="Sound" aria-pressed="true" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path class="on" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"></path><path class="off" d="M16 9l5 6M21 9l-5 6" style="display:none"></path></svg></button>
+<div id="hint" hidden>Hold the card flat and fill the screen with it</div>
+<div id="scene-holder"></div>
+<script>
+document.getElementById('go').addEventListener('click', function () {
+  document.getElementById('start').remove();
+  document.getElementById('hint').hidden = false;
+  if (window.DPSound) DPSound.unlock();
+  DPAR.buildScene(document.getElementById('scene-holder'));
+  document.getElementById('modes').hidden = false;
+  document.getElementById('sound').hidden = false;
+});
+(function () {
+  var box = document.getElementById('modes'), btns = box.querySelectorAll('button');
+  function paint() { btns.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.mode === DPAR.getMode() ? 'true' : 'false'); }); }
+  btns.forEach(function (b) { b.addEventListener('click', function () { DPAR.setMode(b.dataset.mode); paint(); }); });
+  paint();
+  var sb = document.getElementById('sound');
+  function paintSound() { var on = !window.DPSound || DPSound.isOn(); sb.setAttribute('aria-pressed', on ? 'true' : 'false'); sb.setAttribute('aria-label', on ? 'Sound on – tap to mute' : 'Sound off – tap to turn on'); sb.querySelector('.on').style.display = on ? '' : 'none'; sb.querySelector('.off').style.display = on ? 'none' : ''; }
+  sb.addEventListener('click', function () { if (window.DPSound) { DPSound.unlock(); DPSound.setEnabled(!DPSound.isOn()); } paintSound(); });
+  paintSound();
+})();
+</script>
+</body>
+</html>

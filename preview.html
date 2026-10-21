@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dear Postcard – Animation preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&amp;family=Caveat:wght@700&amp;display=swap">
+<script src="./sound.js"></script>
+<script src="./ar.js"></script>
+<style>
+body{margin:0;padding:20px;font-family:system-ui,sans-serif;background:#2a2740;color:#fff;text-align:center}
+select{font:inherit;padding:8px 12px;border-radius:8px}
+#stage{position:relative;display:inline-block;margin-top:20px}
+#stage img{display:block}
+#stage canvas{position:absolute;pointer-events:none}
+</style>
+</head>
+<body>
+<label for="pick">Preview animation: </label><select id="pick"></select>
+<div><div id="stage"><img id="card" alt="Card design"><canvas id="cv"></canvas></div></div>
+<script>
+(function () {
+  var T = DPAR.TARGETS, A = DPAR.ANIMS, pick = document.getElementById('pick'), img = document.getElementById('card'), cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  T.forEach(function (t, i) { var o = document.createElement('option'); o.value = i; o.textContent = t.file; pick.appendChild(o); });
+  var cur, st, t0;
+  function load(i) {
+    cur = T[i]; st = {}; A[cur.anim].init(st, cur.w, cur.h); t0 = performance.now();
+    img.onerror = function () { img.onerror = null; img.src = './targets-images/' + cur.file; };
+    img.src = './targets/' + cur.file; img.style.width = cur.w + 'px'; img.style.height = cur.h + 'px';
+    cv.width = (cur.w + 2 * cur.m) * 2; cv.height = (cur.h + 2 * cur.m) * 2;
+    cv.style.width = (cur.w + 2 * cur.m) + 'px'; cv.style.height = (cur.h + 2 * cur.m) + 'px'; cv.style.left = -cur.m + 'px'; cv.style.top = -cur.m + 'px';
+  }
+  pick.addEventListener('change', function () { load(+pick.value); });
+  var q = new URLSearchParams(location.search).get('i'); if (q) pick.value = q;
+  load(+pick.value || 0);
+  (function loop() {
+    var t = (performance.now() - t0) / 1000;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.setTransform(2, 0, 0, 2, cur.m * 2, cur.m * 2); DPAR.drawAll(ctx, t, st, cur);
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>
+</body>
+</html>

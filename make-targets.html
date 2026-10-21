@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dear Postcard – Make targets</title>
+<script src="./ar.js"></script>
+<style>
+body{margin:0;padding:32px 20px;font-family:system-ui,sans-serif;background:#faf6ee;color:#222;max-width:720px;margin:auto;line-height:1.5}
+h1{margin:0 0 8px}
+button{font:inherit;font-weight:600;padding:12px 24px;border:0;border-radius:999px;background:#1d1a3a;color:#fff}
+button:disabled{opacity:.5}
+ul{padding-left:20px}
+.ok{color:#1d7a3a}.bad{color:#b3261e}
+#bar{height:10px;background:#e4ddd0;border-radius:5px;overflow:hidden;margin:16px 0}
+#bar div{height:100%;width:0;background:#e8467c;transition:width .2s}
+</style>
+</head>
+<body>
+<h1>Make the AR target file</h1>
+<p>Open this page on a laptop after uploading the card images into the <b>targets</b> folder. It checks every image, then builds <b>targets.mind</b> and downloads it. Upload that file to the main folder of your repository.</p>
+<ul id="list"></ul>
+<button id="go" type="button" disabled>Build targets.mind</button>
+<div id="bar"><div></div></div>
+<p id="msg"></p>
+<script>
+(function () {
+  var T = window.DPAR.TARGETS, list = document.getElementById('list'), btn = document.getElementById('go'), imgs = [], ok = 0;
+  T.forEach(function (t, i) {
+    var li = document.createElement('li'); li.textContent = (i + 1) + '. targets/' + t.file + ' … checking'; list.appendChild(li);
+    var folders = ['targets', 'targets-images'], f = 0;
+    var im = new Image(); im.onload = function () { li.textContent = (i + 1) + '. ' + folders[f] + '/' + t.file + ' ✓'; li.className = 'ok'; ok++; if (ok === T.length) btn.disabled = false; };
+    im.onerror = function () {
+      f++; if (f < folders.length) { im.src = './' + folders[f] + '/' + t.file; return; }
+      li.textContent = (i + 1) + '. ' + t.file + ' ✗ missing'; li.className = 'bad';
+    };
+    im.src = './' + folders[0] + '/' + t.file; imgs[i] = im;
+  });
+  btn.addEventListener('click', async function () {
+    btn.disabled = true; var msg = document.getElementById('msg'); msg.textContent = 'Building… keep this tab open (about 2–5 minutes).';
+    var MAX = 700;
+    var small = imgs.map(function (im) {
+      var s = Math.min(1, MAX / Math.max(im.naturalWidth, im.naturalHeight));
+      var c = document.createElement('canvas'); c.width = Math.round(im.naturalWidth * s); c.height = Math.round(im.naturalHeight * s);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return c;
+    });
+    var start = Date.now();
+    try {
+    msg.textContent = 'Loading the build tool…';
+    var mod = await import('https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js');
+    var compiler = new mod.Compiler();
+    msg.textContent = 'Building… 0%. Keep this tab open.';
+    await compiler.compileImageTargets(small, function (p) {
+      document.querySelector('#bar div').style.width = p.toFixed(0) + '%';
+      msg.textContent = 'Building… ' + p.toFixed(0) + '% (' + Math.round((Date.now() - start) / 1000) + ' s). Keep this tab open.';
+    });
+    var buf = await compiler.exportData();
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([buf])); a.download = 'targets.mind'; a.click();
+    msg.textContent = 'Done! targets.mind downloaded. Upload it to the main folder of your repository.';
+    } catch (e) { msg.textContent = 'Error: ' + (e && e.message ? e.message : e) + ' (send a screenshot of this)'; msg.style.color = '#b3261e'; btn.disabled = false; }
+  });
+})();
+</script>
+</body>
+</html>
