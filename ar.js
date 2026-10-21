@@ -1071,11 +1071,11 @@
     });
   }
 
-  function buildScene(holder) {
+  function buildScene(holder, src) {
     var ents = TARGETS.map(function (T, i) {
       return '<a-entity mindar-image-target="targetIndex: ' + i + '"><a-entity dp-anim="index: ' + i + '" position="0 0 0.002"></a-entity></a-entity>';
     }).join('');
-    holder.innerHTML = '<a-scene mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1; filterMinCF: 0.0001; filterBeta: 0.001" color-space="sRGB" renderer="colorManagement: true; alpha: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" embedded style="position:absolute;top:0;left:0;width:100%;height:100%">' +
+    holder.innerHTML = '<a-scene mindar-image="imageTargetSrc: ' + (src || './targets.mind') + '; maxTrack: 1; filterMinCF: 0.0001; filterBeta: 0.001" color-space="sRGB" renderer="colorManagement: true; alpha: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" embedded style="position:absolute;top:0;left:0;width:100%;height:100%">' +
       '<a-camera position="0 0 0" look-controls="enabled: false"></a-camera><a-entity light="type: ambient; intensity: 0.9"></a-entity><a-entity light="type: directional; intensity: 0.8" position="0.5 1 1"></a-entity>' + ents + '</a-scene>';
   }
 
