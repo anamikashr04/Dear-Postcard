@@ -62,6 +62,12 @@ function startSet(set) {
     if (!blob) return;
     hint.textContent = 'Point at your ' + NAMES[set] + ' – hold it flat and fill the screen with it';
     DPAR.buildScene(document.getElementById('scene-holder'), URL.createObjectURL(blob), set);
+    var sc = document.querySelector('#scene-holder a-scene'), ready = false;
+    if (sc) {
+      sc.addEventListener('arReady', function () { ready = true; });
+      sc.addEventListener('arError', function () { hint.textContent = 'Camera could not start – allow camera access for this site (Settings → Safari → Camera → Allow), then tap Change.'; });
+    }
+    setTimeout(function () { if (!ready) hint.textContent = 'Still starting… if nothing happens, close other apps using the camera, open this link directly in Safari or Chrome (not inside WhatsApp/Instagram), and allow camera access.'; }, 15000);
   }).catch(function () { hint.textContent = 'Could not load – check your internet connection.'; });
   document.getElementById('modes').hidden = false;
   document.getElementById('sound').hidden = false;
