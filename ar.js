@@ -4,13 +4,13 @@
    in the same pixel coordinates as the design files. */
 (function () {
   var TARGETS = [
-    { file: 'moon.png',             w: 397, h: 559, m: 40,  anim: 'moon', fx: { water: { x0: 0, x1: 397, y0: 412, y1: 559, mx: 186, col: '255,236,180' }, glitter: { n: 40, cols: ['#FFF4D2', '#FFFFFF', '#C9D6FF'] } } },
+    { file: 'moon.png',             w: 397, h: 559, m: 40,  anim: 'moonCard', sound: 'moon' },
     { file: 'csmt.png',             w: 559, h: 397, m: 40,  anim: 'csmt', fx: { glitter: { n: 30, cols: ['#FFFFFF', '#FFE27A', '#FF7AA2'] } } },
     { file: 'diwali.png',           w: 559, h: 397, m: 40,  anim: 'diwali', fx: { glitter: { n: 60, cols: ['#FFD23F', '#FFFFFF', '#FF9F1C', '#FF7AA2'] } } },
     { file: 'christmas.png',        w: 559, h: 397, m: 220, anim: 'christmas', fx: { glitter: { n: 45, cols: ['#FFFFFF', '#FFE9A8', '#BFE3FF'] } } },
     { file: 'newyear.png',          w: 559, h: 397, m: 40,  anim: 'newyear', fx: { glitter: { n: 55, cols: ['#FFD23F', '#FFFFFF', '#5CE1D8'] } } },
-    { file: 'torii-portrait.png',   w: 397, h: 559, m: 20,  anim: 'sakura', fx: { water: { x0: 40, x1: 340, y0: 428, y1: 528, mx: 245, col: '255,200,225' }, glitter: { n: 50, cols: ['#FFFFFF', '#FFD9E8', '#FFC2DA'] } } },
-    { file: 'torii-landscape.png',  w: 559, h: 397, m: 20,  anim: 'sakura', fx: { water: { x0: 0, x1: 559, y0: 296, y1: 397, mx: 452, col: '255,210,190' }, glitter: { n: 50, cols: ['#FFFFFF', '#FFD9E8', '#FFC2DA'] } } },
+    { file: 'torii-portrait.png',   w: 397, h: 559, m: 20,  anim: 'sakuraCard', sound: 'sakura' },
+    { file: 'torii-landscape.png',  w: 559, h: 397, m: 20,  anim: 'sakuraCard', sound: 'sakura' },
     { file: 'sticker-mumbai.png',   w: 284, h: 284, m: 70,  anim: 'stickerMumbai', fx: { glitter: { n: 26, cols: ['#FFFFFF', '#FFE27A', '#FF7AA2'] } } },
     { file: 'sticker-navi.png',     w: 284, h: 284, m: 70,  anim: 'stickerNavi', fx: { glitter: { n: 26, cols: ['#FFFFFF', '#FFE27A', '#8FDCCB'] } } },
     { file: 'sticker-cat.png',      w: 284, h: 284, m: 80,  anim: 'cat', fx: { glitter: { n: 30, cols: ['#FFFFFF', '#FFC2DA', '#FFE27A'] } } },
@@ -19,12 +19,13 @@
     { file: 'csmt-hindi.png',       w: 559, h: 397, m: 40,  anim: 'csmtHindi', fx: { glitter: { n: 30, cols: ['#FFFFFF', '#FFE27A', '#FF7AA2'] } } },
     { file: 'sticker-designer.png', w: 284, h: 284, m: 70,  anim: 'stickerDesigner', fx: { glitter: { n: 28, cols: ['#FFFFFF', '#FFC93C', '#5CE1D8', '#FF7AA2'] } } },
     { file: 'winter.png',           w: 559, h: 397, m: 40,  anim: 'winter', fx: { water: { x0: 0, x1: 559, y0: 232, y1: 262, mx: 300, col: '255,255,255' }, glitter: { n: 30, cols: ['#FFFFFF', '#E9F6FB', '#BDE4F4'] } } },
-    { file: 'bookmark-sakura.png',  w: 189, h: 567, m: 30,  anim: 'sakura', fx: { water: { x0: 0, x1: 189, y0: 452, y1: 540, mx: 120, col: '255,200,225' }, glitter: { n: 34, cols: ['#FFFFFF', '#FFD9E8', '#FFC2DA'] } } },
+    { file: 'bookmark-sakura.png',  w: 189, h: 567, m: 30,  anim: 'bmSakura', sound: 'sakura' },
     { file: 'bookmark-village.png', w: 189, h: 567, m: 30,  anim: 'vid', cfg: 'BM', sound: 'village' },
     { file: 'village-life.png',     w: 397, h: 559, m: 30,  anim: 'vid', cfg: 'A', sound: 'village' },
     { file: 'monsoon.png',          w: 397, h: 559, m: 30,  anim: 'vid', cfg: 'M', sound: 'monsoon' },
     { file: 'village-hut.png',      w: 397, h: 559, m: 30,  anim: 'vid', cfg: 'B', sound: 'village' }
   ];
+  TARGETS.forEach(function (T) { T.set = /^bookmark-/.test(T.file) ? 'bookmarks' : (/^sticker-/.test(T.file) ? 'stickers' : 'cards'); });
 
   var INK = '#1D1D1B';
   function rnd(a, b) { return a + Math.random() * (b - a); }
@@ -709,9 +710,6 @@
 
   ANIMS.fah = {
     init: function () {},
-    onFound: function () {
-      try { var u = new SpeechSynthesisUtterance('Faaaaaaaaah'); u.rate = 0.55; u.pitch = 0.7; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
-    },
     draw: function (ctx, t) {
       var T = t % 4.6, n = Math.max(1, Math.min(26, Math.floor((T - 0.15) * 9))), txt = 'FA' + new Array(n + 1).join('H');
       var intensity = Math.min(1, n / 26), sx = (Math.random() - 0.5) * 4 * intensity, sy = (Math.random() - 0.5) * 4 * intensity;
@@ -956,6 +954,57 @@
       for (var k = 0; k < 2; k++) { var p = ((t * 0.9 + k * 0.5) % 1); ctx.globalAlpha = 1 - p; ctx.fillStyle = '#7FC4FF'; ctx.beginPath(); ctx.ellipse(70 - k * 4, 70 + p * 30, 3.5, 5.5, 0, 0, Math.PI * 2); ctx.fill(); } ctx.globalAlpha = 1;
     }
   };
+
+  /* ===== Moon postcard: bamboo sways, moonlit water ripples and sparkles, leaves drift ===== */
+  ANIMS.moonCard = {
+    card: true,
+    init: function (st) { st.leaves = []; for (var j = 0; j < 5; j++) st.leaves.push({ ph: j * 2.1, sp: rnd(9, 13), x0: rnd(330, 390) }); st.ff = []; for (var i = 0; i < 8; i++) st.ff.push([rnd(240, 385), rnd(120, 390), rnd(0, 6.28)]); },
+    draw: function (ctx, t, st, w, h, T) {
+      liveGlow(ctx, t, T, '255,244,214', 0.22);
+      liveGlints(ctx, t, T, '255,244,200');
+      st.ff.forEach(function (f, i) { var x = f[0] + Math.sin(t * 0.6 + f[2]) * 14, y = f[1] + Math.cos(t * 0.45 + f[2]) * 10, a = 0.5 + 0.5 * Math.sin(t * 2 + f[2]); glowDot(ctx, x, y, 7, '220,255,190', 0.55 * a); });
+      st.leaves.forEach(function (l) {
+        var p = ((t + l.ph) % l.sp) / l.sp, x = l.x0 - p * 90 + Math.sin(p * 11) * 16, y = 40 + p * 360;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(p * 9) * 0.9 + 2.5); ctx.globalAlpha = p > 0.85 ? (1 - p) / 0.15 : Math.min(1, p * 6);
+        ctx.fillStyle = '#17323A'; ctx.beginPath(); ctx.ellipse(0, 0, 14, 3, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      });
+    }
+  };
+  /* ===== Sakura postcards (torii portrait + landscape): blossoms sway, petals fall, shooting stars ===== */
+  ANIMS.sakuraCard = {
+    card: true,
+    init: function (st, w, h) {
+      st.petals = []; for (var i = 0; i < 46; i++) st.petals.push({ x: rnd(-20, w + 20), y: rnd(-h, h), s: rnd(14, 30), sz: rnd(0.7, 1.3), r: rnd(0, 6), vr: rnd(-2, 2), ph: rnd(0, 6), c: ['#FFC2DA', '#F7A8C8', '#FFD9E8', '#F27BAE'][i % 4] });
+      st.next = 1.2; st.stars = [];
+    },
+    draw: function (ctx, t, st, w, h, T) {
+      liveGlow(ctx, t, T, '255,170,150', 0.2);
+      liveGlints(ctx, t, T, '255,215,235');
+      if (t > st.next) { st.stars.push({ x: rnd(w * 0.4, w * 0.95), y: rnd(10, h * 0.25), t0: t, len: rnd(100, 170) }); st.next = t + rnd(2.5, 4.5); }
+      st.stars = st.stars.filter(function (s) { return t - s.t0 < 1.1; });
+      st.stars.forEach(function (s) { shootingStar(ctx, s.x, s.y, s.len, (t - s.t0) / 1.1); });
+      st.petals.forEach(function (p) { var y = ((p.y + t * p.s) % (h + 30)) - 15, x = p.x + Math.sin(t * 0.9 + p.ph) * 18 - (t * 6 % 40); petal(ctx, x, y, p.r + t * p.vr, p.sz, p.c); });
+    }
+  };
+  /* ===== Sakura BOOKMARK (its own animation): slow breeze, petals spiral down the strip, light motes rise from the water ===== */
+  ANIMS.bmSakura = {
+    card: true,
+    init: function (st, w, h) {
+      st.petals = []; for (var i = 0; i < 18; i++) st.petals.push({ ph: i / 18, sp: rnd(9, 14), amp: rnd(18, 40), sz: rnd(0.6, 1.0), r: rnd(0, 6), c: ['#FFC2DA', '#FFD9E8', '#F7A8C8'][i % 3] });
+      st.motes = []; for (var j = 0; j < 12; j++) st.motes.push({ x: rnd(20, w - 20), ph: j / 12, sp: rnd(7, 11) });
+    },
+    draw: function (ctx, t, st, w, h, T) {
+      var c = LIVE[T.file].glow, rp = (t % 4) / 4;
+      liveGlow(ctx, t, T, '255,175,160', 0.26);
+      ctx.save(); ctx.strokeStyle = 'rgba(255,214,200,' + (0.45 * (1 - rp)).toFixed(3) + ')'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(c[0], c[1], c[2] * (1.05 + rp * 0.6), 0, 6.283); ctx.stroke(); ctx.restore();
+      liveGlints(ctx, t, T, '255,220,236');
+      st.motes.forEach(function (m) { var p = ((t / m.sp) + m.ph) % 1, y = 530 - p * 260, x = m.x + Math.sin(t * 0.8 + m.ph * 9) * 8; glowDot(ctx, x, y, 6, '255,200,150', 0.55 * Math.sin(p * Math.PI)); });
+      st.petals.forEach(function (p) {
+        var q = ((t / p.sp) + p.ph) % 1, y = -10 + q * (h + 20), x = 40 + q * 90 + Math.sin(q * 9 + p.ph * 6) * p.amp;
+        ctx.globalAlpha = q > 0.9 ? (1 - q) / 0.1 : 1; petal(ctx, x, y, p.r + t * 1.2, p.sz, p.c); ctx.globalAlpha = 1;
+      });
+    }
+  };
   function popIn(ctx, t, T) {
     if (t > 1.4) return; var p = t / 1.4, a = 1 - p, e = 6 + p * 30;
     ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 4 * a + 1; ctx.shadowColor = 'rgba(255,220,140,' + a + ')'; ctx.shadowBlur = 18;
@@ -965,26 +1014,49 @@
   }
   /* white postcard/bookmark border: art is scaled into the inner box, exactly as printed */
   /* living card: the printed image itself ripples (water) and sways (leaves, lanterns) */
-  var LIVE = {"moon.png": {"w": [[8, 405, 389, 498, 3.2]], "s": [[248, 8, 389, 472, 322, 472, 0.9]]}, "torii-portrait.png": {"w": [[40, 422, 332, 520, 3]], "s": [[8, 8, 178, 382, 8, 382, 1.1], [268, 58, 389, 402, 389, 402, 1.1]]}, "torii-landscape.png": {"w": [[70, 300, 498, 386, 3]], "s": [[8, 8, 245, 302, 8, 302, 1.0], [478, 118, 551, 322, 551, 322, 1.2]]}, "marine.png": {"w": [[8, 248, 551, 300, 2.6]], "s": []}, "bookmark-sakura.png": {"w": [[8, 455, 181, 522, 2.4]], "s": [[8, 8, 95, 95, 8, 8, 1.6]]}, "diwali.png": {"w": [], "s": [[38, 22, 102, 136, 70, 24, 4], [466, 22, 528, 126, 497, 24, 4]]}};
+  /* living card: parts of the printed picture move by a smooth warp (no cut-out blocks).
+     Each effect has a soft weight map so motion fades to zero at its edges. */
+  var LIVE = {"moon.png":{"fx":[{"k":"wave","r":[8,402,389,500],"tw":8,"th":2,"g":"0000000000000000000000000000000000000000000000001111111111111111111111111111111100110011101100113444444444444444444444444444444223441144403410424888888888888888888888888888888667882388716821746aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa9aaaa34aa918a31957ccccccccccccccccccccccccccccccccccc35ccb1ac31b68ffffffffffffffffffffffffffffffffffe45ffd1ce41e79hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh46hhf1fh41g8bjjjjjjjjjjjjjjjjjjjjjijjjjjjjjjjjjj57jjh2hj51i9cmmmmmmmmmmmmmmmmmmmmmjkmmmmmmmmmmml68mmi2kl62kadoooooooooooooooooooonkkoooooooooooo69ook2mo62mbfqqqqqqqqqqqqqqqqqqqqllnqqqqqqqqqqqq6aqqm2nq62ocgtttttttttttttttttttrhgottttttttttts69sto2ps61pdhvvvvvvvvvvvvvvvvvvvtmhnvvvvvvvvvvvu6avvq2ru61rfjxxxxxxxxxxxxxxxxxxxwursxxxxxxxxxxxx8cxxs3ux82ugjzzzzzzzzzzzzzzzzzzzzzyyzzzzzzzzzzzz9dzzu3wz93whjzzzzzzzzzzzzzzzzzzzzywxwzzzzzzzzzzz9dzzu4wz93whjzzzzzzzzzzzzzzzzzzzzvvskyzzzzzzzzzz9dzzu4wz93whjzzzzzzzzzzzzzzzzzzzywvneyzzzzzzzzzz9dzzu4wz93whjzzzzzzzzzzzzzzzzzzzvyvoozzzzzzzzzzy7dzzu4wz93whjzzzzzzzzzzzzzzzzzzyuyvqxzzzzzzzzzzy6dzzu4wz93whjzzzzzzzzzzzzzzzzzzzxztnzzzzzzzzzzzy5dzzu4wz93whjzzzzzzzzzzzzzzzzzzzyyvtzzzzzzzzzzzy5dzzu4wz93whjzzzzzzzzzzzzzzzzzzytuyyzzzzzzzzzzzy5ezzu4wz93whjzzzzzzzzzzzzzzzzzzxrmyzzzzzzzzzzzzy5ezzu4wz93whjzzzzzzzzzzzzzzzzzzxthxzzzzzzzzzzzzy5ezzu4wz93whjzzzzzzzzzzzzzzzzzzuplyzzzzzzzzzzzzy5fzzu4wz93whjzzzzzzzzzzzzzzzzzzslsyzyzzzzzzzzzzy5hzzu4wz83whjzzzzzzzzzzzzzzzzzzrluzytyzzzzzzzzzy5izzu4wz83whjzzzzzzzzzzzzzzzzzzvtyzynyzzzzzzzzzy5izzu4wy73whjzzzzzzzzzzzzzzzzzzzyzzyqyzzzzzzzzzy5izzu4wy63whjzzzzzzzzzzzzzzzzzzzzyzyqxzzzzzzzzzy5izzu4wy53whjzzzzzzzzzzzzzzzzzzzywyxnwyzzzzzzzzy5izzu4wy53whjzzzzzzzzzzzzzzzzzzzxrvwpxyzzzzzzzzy5izzu3wy53whjzzzzzzzzzzzzzzzzzzwxtuvpuxzzzzzzzzy5izzt3wy53whjzzzzzzzzzzzzzzzzzzuxwtuoovzzzzzzzzy5izzr3wy53whjzzzzzzzzzzzzzzzzzzxysqqorwzzzzzzzzy5izzq3wy53whjzzzzzzzzzzzzzzzzzzzzttrnuxzzzzzzzzy5izzq3wy53xhjzzzzzzzzzzzzzzzzyywwwyxswyzzzzzzzzy5izzq3wy53xgjzzzzzzzzzzzzzzzzttnmywyyzzyzzzzzzzy5izzq3wy53uejzzzzzzzzzzzzzzzyoqilynvzzzwzzzzzzzy5izzq3wy52j7jzzzzzzzzzzzzzzzztvmsynsyyxszzzzzzzy5izzq3us4151jzzzzzzzzzzzzzzzzyxmqwtsvutszzzzzzzy5hzzp2jd1000jzzzzzzzzzzzzzzzzywkmnpqqoovzzzzzzzx3gxti1520000jzzzzzzzzzzzzzzzzzwnrihmmgjwzzzzzzzw3foe60000000jzzzzzzzzzzzzzzzzzvrxsllojkxzzzzzzzw3da310000000jwwwwwwwwwwwwwwwwvquwunjropuvwwwwwwu262000000000ekkkkkkkkkkkkkkkjjhkkgb8gghgikkkkkki110000000000577777777777777757777533666667777776000000000000","a":2.4,"f":0.16,"s":1.5},{"k":"sway","r":[232,8,389,404],"tw":6,"th":6,"g":"0000000000018a300298215ca31000000000003mr7005ol31dwp61000000000003nq5004ol31ewp61000000000004op5004ol31ewp61000000000004pp4004ol31ewp51000000000005pp4004ol21ewp4000000000036arp6104ok21ewp400000000007iqxvkc67oj21fwp400000000014amxzyvpltk22hxq50000000003clsyzzzzxwi21fwo400000000015ckvxvyyxwh11ewm30000000000017qspxvnsh11evl20000001110007rwvrg9oh11dvl200000139db52asul926og11evk20000014ertoinun6106pg11gvk2000004dnvwwvuuk2006og11guj2000003blpsvvstj2006of11gtj200000016dnuursj2006ne11gtj200000018lstoiqj3007ne12hsk30000003fpqj98ni2006mc12gsj20000002cgb416mg2017me44frh20000001331007me118hpnkjmqf10000000000008ne12bnrrrqqqe10000000000008me4aglppolmpd10000000000007ld467bmnlijod10000000000007ld125ennh9fnd10000000000007kc26elnf52enc1000000000001akc26chla12emc1000000000001blf6459j912fmc10000000000008kkga48i902elc10000000000008jdaeeei702dkb10000000000008ia6ciki602dkb10000000000019jhhjjih602cja1000000000003cjjkjeaf601ci800000000000029ijid56e501ch700000000000007hhb416e501bh700000000002317ga2007e502bg700000000005b9af70007e502cg700000000006efff70007d502cf70000000001afggf60007d502cf70000000003cffee50006c402be60000000016deaac40006b302ad60000000028b837b40005a302ad500000000244117b40005a3029c500000000000016a4000592029b500000000000006a3000592028b40000000000000693000482028a400000000000016930016954699300000000000016832468a99aa9300000000000016832689988898300000000000015721235742378300000000000015620004620277200000000000015620004610167200000000000014510003510166200000000000004510003410155200000000000003410003410155200000000000003410003310144100000000000013410002310144100000000000013310002310133100000000000012310002200133100000000111002210002200122100000011112112200001200122000000001111112100001100021000000011111111100001100011000000000001111100000000011000000000000000000000000000000","a":5.5,"s":0.85,"ph":0.012}],"gl":[[157,408,5.2],[180,405,7.9],[229,406,11.2],[162,404,7.4],[162,482,8.7],[190,422,4.2],[178,428,9.4],[188,422,11.4],[160,408,10.6],[175,469,11.1],[170,404,9.3],[177,404,6.0],[195,475,10.1],[204,425,5.7],[179,453,10.7],[200,407,4.5],[172,427,10.6],[193,440,5.3],[187,405,7.0],[171,412,6.5],[207,407,9.5],[219,491,5.4],[202,440,7.2],[179,469,4.0],[179,452,6.1],[201,451,7.4],[183,429,4.8],[175,426,9.1],[161,407,7.0],[149,407,9.8],[205,405,9.2],[202,422,7.4],[196,428,10.9],[143,405,9.1],[153,405,10.5],[193,426,6.7],[200,491,8.3],[202,407,5.6],[189,426,12.0],[173,436,5.9],[141,406,6.1],[178,429,4.6],[163,459,6.1],[183,427,10.1],[198,405,9.6],[170,428,5.0],[208,451,7.0],[192,440,7.4],[172,459,9.3],[161,459,7.6],[209,404,8.7],[192,429,10.7],[200,460,9.8],[183,407,6.9],[201,491,7.6],[166,407,6.9],[183,453,4.9],[195,428,5.6],[186,406,6.3],[192,457,6.5],[160,482,6.5],[206,461,8.6],[186,405,11.8],[182,407,10.2],[181,412,10.3],[209,492,10.1],[183,450,8.8],[204,407,11.3],[181,405,9.5],[164,484,8.0]],"glow":[187,218,96]},"torii-portrait.png":{"fx":[{"k":"wave","r":[30,418,345,528],"tw":8,"th":2,"g":"00000000000000000000000000000000000000000110000011111111111111111111111111111110121100013233233233333333223322333333332124210001666547757777777745666666777777512641000299997ba8bbbbbbbb79abaaabbbbbbb9215710112b98b9edaeeeeeeeeaccedbcdeeeedec314810112c74c7gfchhhhhhhhdefgecfghhhhghe313810112d32c5jifkkkkkkkkfghjhehjkkkjjkg323500202e21d5lkimmmmmmmmgiimlhkmmmmmmmh211201312g31e5lmkpppppppphifopjnpppppppi100000422h51e5lomrssssssshhcqrlrsssssssh100000324i62e7msquuuuuuuujhasunuuuuuuuug012301214la6ebovuxxxxxxxxnlevxqxxxxxxxxe037503133ohdhdpyyzzzzzzzzqqkyyszzzzzzzwa08d614163qkklcozzzzzzzzzzqsoyzuzzzzzzzr50ck7576c9spqpcozzzzzzzzzzrtrzzwzzzzzzxh10eseddekiuuvteozzzzzzzzzzsvtzzxzzzzzzt800exkiknsqwxywfozzzzzzzzzzvwuzzxzzzzzzm200dynmptwvyzzykpzzzzzzzzzzxwvzzyzzzzzyd100cypquxyxyzzynszzzzzzzzzzxwxzzyzzzzzv7000bxtvxzzzyzzypuzzzzzzzzzzwvyzyyzzzzzr3000axxyzzzzzzzxswzzzzzzzzzzwvxzyyzzzzzn1000avzzzzzzzzywuwzzzzzzzzzzwtvzzyzzzzzh0000aszzzzzzzzwuvvzzzzzzzzzzxstzzzzzzzyc1000aqzzzzzzzzwtwvzyzzzzzzzzxsvzzzzzzzy91000aozzzzzzzzxwyxyyzzzzzzzzwtxzzzyzzzx61000amyzzzzzzzzyzzyxzzzzzzzzwtzzzyyzzzs410009lyzzzzzzzzzzzzyzzzzzzzzvtzzzwxzzyj200007jxzzzzzzzxyzyzzzzzzzzzzwvyzztwzzv9000116hvzzzzzzyvvywzzzzzzzzzzxvxzzsxzzp3000415huzzzzzzzstwszzzzzzzzzzyvvzzuxzyi1001614jwzzzzzzzsuuozzzzzzzzzzzvtzzvxzxd0001503lxzzzzzzztxrlyzzzzzzzzzztqzzuwzu80002402ixzzzzzzzwyrnyzzzzzzzzzyppzzsvzo40002302cvzzzzzyzxxtqyzzzzzzzzzylqzzrvyg100032027rzzzzyxyvwvnwzzzzzzzzzxjqzztxx9000041016myzzzyxvruuiuzzzzzzzzzxhpyyuyu4000051018fvyzzzyuptrfrzzzzzzzzzxiqwvtyq200005000a9mvzzzzvrrpfrzzzzzzzzyvirvtrym10000500094bozzzzyvurgszzzzzyyzytfrwusxh000003000623gxzzzzyxugrzzzzzyyzztdsyxtvc000001001411arwyzzzzvgpzzzzzyyzztftzysr70000000023207hotvxyyvjozzzzzyzzythuzyrl300000000222057chlqtutjnxyyzzxzzwthszyrc100000000211022369eikninuvwyyvyxsserzyl4000000000100000012469fgnprrtvtxtqocrzxc10000000000000000001139bllnnnqsvsriauzs5000000000000000000000155eflmjlrrtue9vzm100000000000000000000002257goliqmqsd9twf000000000000000000000002212bqnjplnl9aln80000000001100000001100054107monolmd67aa30000000004200000002100055102dmomjj74322100000000093000000021000240004gijfb221000000000000b4000000010000010002acda5010000000000000840000000000000000014454100000000000000032","a":2.2,"f":0.17,"s":1.6},{"k":"sway","r":[8,8,389,420],"tw":6,"th":6,"g":"0000000000000124697544430000000000000000000000000000000000000000000000001111012bkqsnd784100000000000000000000000000000000000000000000000210002377ghkj730000000000000000000000000000000000000000010000001331003bjehagog50175100000000000000000000000000000000000000000001543336gpnsi877b739610000000000000000000000000000000000001000000032137ccmoqqj88pla410000000000000000000000000000000000100000000101114bieglhotmbkpic600000000000000000000000000000000001000000001201347b9bhkkuuohb6530000000000000000000000000100000000000000000141145358elrqvuth9f50000000000000000000000000131010023132000017200000697intrhtttpfb31200000000000000000000010155110028763000049200000357opjf6gnsne4222000000000000000000000012552015bb6211023a4039930255gj729imti319d300000000000000000000136c730026b62221157c718log2138h814ef9bb30282000000000000000000006c9kd41212cd4672027dd35fng2105i816710011000000000000000000000002cihne74532367b7101458aadhe5506hb21000000000000000000001221001358jrnlab6311117f50039649ce9cd813620000000000000000000000379a626c85cofacpi644744a6106b6267bccga011000001310000000000000000115bfd9215722bnqefbc74ea02ee8di8ab8a71000000014410000000000000000002clb4432036afhohe75b702hnkmb3534fd3210000000100000000000000000000179c63003976agf7466114hlkb375114355000000000000000000000000000000386200325674772872005kkki888200021000000000000000000000000000000152003a42dh33314311139bkrk76200000000000000000000000000000000000043126efcme1240035417jcfjl851000000010000000000000000000000000000003abfjgd52730173217rrmgkje50000000102100000000000000000000000000247a865413gc2575617kpwqbca1000000000640000000000000000000000000032111000003bcif7826qrqkb7600000000002100000000000000000000000000100000000007ktl3102mqh732115300000000000000000000000000000000000000000000001bqd2003nmlk9235976101000000000000000000000000000000000000000002amk30005lovumimqlni67100000000000000000000000000000000000000036bkqc10004fmtxyyyyvvd8c1000000000000000000000000000000000000002anphc3000017mtyzzyxywhmh1110000000000000000000000000000000000565emi510000019osxxwyzzywwh7gi61251000000000000000000000000000006a7ejb11000003jppuswyyxvtywtwtg2120000000000000000000000000000001224ek40000004qvssrvvsqptyxvxoab4000000000000000000000000000000000012610000003ipqooqolllnuvxwlioa000000000000000000000000000000000000000000004gntlipqskemvwyyvoa3000000000000000000000000000000000000000001215chnkivwtgktuxyxumg4410000000000000000000000000000000000000158634blrsmpql8bedkuxn76221000000000000000000000000000000000000014ab33gnsxtcci7112bhnd12200000000000000000000000000000000000000395ei41akvyta7be5112232000000000000000000000000000000000000000128f8ff316dlvupl9gi60000000000000000000000000000000000000000000137ccbij5158ervyvqla10000000000000000000000000000000000000000138glnopqmg4178cjmuyyvg5100000000000000000000000000000000000000038irwsqibjm4157ellmsuxvpe600000000000000000000000000000000000026irvxywi83bd20137honptusrpb0000000000000000000000000000000000018iquwyzwia64310024bhmusqi87300000000000000000000000000000000000016cjjmssttqc6100014diuyysfkf200000000000000000000000000000000000001237cgmppqk501002dlvzztkpi20000000000000000000000000000000000000008knidcbln6262359huyyxth50000000000000000000000000000000000000284ixxpg97gk54d9biafqwwwxvg2000000000000000000000000000000000141ctmqyzxrh78823ekousokqljosn40000000000000000000000000000000005j8fwwwwxtqpc3111dmtuwtmlc687710000000000000000000000000000000008nnpvwwvsmlpj8202hnsrwxtmog621000000000000000000000000000000000027dqvvtuqijllb404nppswwqkqn50000000000000000000000000000000000001covvvtvroe6cc923fnruvyyrcb34100000000000000000000000000000000006rzzzzwsmle8aac31afqurtyvc74a50000000000000000000000000000000000cxzzyytnjjkeaah503bkpssvxnacga1000000000000000000000000000000000dxzyxxrppsqlcdf4003elowvstif841000000000000000000000000000000000dxzxwvttxwstkgm50006dckoggi7200000000000000000000000000000000000dwxwwvuvtrqvtso500029936ca510000000000000000000000000000000000006feb999a769qsnh30000550042000000000000000000000000000000000000000110038bdimpnkc200000000000000000000000000000000000000000000000000002dqrquulhc7100012100241000000000000000000000000000000000000000003gnpnqkgeb300014761014100000000000000000000000000000000000000000249bejgdb6100014765000000000000000000000000000000000000000000000002bmie78510014966510000000000000000000000000000000000000000000000279772251000499a621200000000000000000000000000000000000000000000000000000000115764210000000000000000000000000000000000000000000000000000000000111210000000000000000000000000000000000000000000000000000000","a":3.2,"s":1.25,"ph":0.03}],"gl":[[294,458,5.4],[286,469,5.4],[247,463,8.8],[153,471,4.9],[212,468,4.2],[183,465,10.7],[175,485,4.8],[201,473,7.6],[228,461,7.9],[297,455,9.0],[225,470,8.0],[282,476,11.5],[203,461,10.0],[209,481,8.6],[139,447,8.9],[144,463,8.1],[151,452,11.7],[221,457,5.8],[217,457,9.5],[95,474,8.4],[207,474,4.3],[225,464,6.4],[203,470,11.4],[290,463,10.3],[92,474,4.1],[199,459,6.4],[212,476,4.1],[106,480,10.6],[148,467,4.9],[285,457,4.5],[162,466,11.9],[200,460,7.6],[219,466,6.5],[220,449,4.4],[99,471,7.1],[252,453,6.9],[295,460,8.2],[152,466,4.1],[204,476,5.2],[106,490,5.7],[295,459,7.5],[195,461,6.4],[208,466,8.9],[217,460,6.3],[212,464,11.3],[204,462,11.7],[152,472,4.5],[143,480,5.7],[195,469,8.5],[251,459,10.2],[107,480,4.5],[282,458,5.5],[297,477,7.7],[250,453,9.3],[279,462,11.2],[209,463,10.9],[208,479,10.4],[190,470,4.4],[204,471,11.8],[273,453,8.9]],"glow":[241,140,38]},"torii-landscape.png":{"fx":[{"k":"wave","r":[60,296,505,389],"tw":8,"th":2,"g":"000000000000000000000000000000000000000000000000000000001111111111111111111111111111111111111111111111111111111134444444444444444444444444444444444444444444444444444442488888888888888888888888888888888888888888888888888888846eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeed57hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhg69kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkj7annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnm8bqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqp9ctttttttttttttttttttttttttttttttttttttttttttttttttttttsabswxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxvb7kwzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzxc28pzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzxc02gyzzzzzzzzzzzzzzzzzxwyzzzzzzzywxzzzzzzzzzzzzzzzzzzzzxc008uzzzzzzzzzzzzzzyzypovzzzzzzzvopyzyzzzzzzzzzzzzzzzzzxb002myzzzzzzzzzzzzyuwxdbqzzzzzzzqbexwuyzzzzzzzzzzzzzzzzw9000dwzzzzzzzzzzzzxkrw63nzzzzzzzn36wrkxzzzzzzzzzzzzzzzyq50005qzzzzzzzzzzzzxdnw75ozzzzzzzo58wndxzzzzzzzzzzzzzzzwg20001iyzzzzzzzzzzzxgpxfdszzzzzzzsdgxpgxzzzzzzzzzzzzzzyo6000009vzzzzzzzzzzzyouyonwzzzzzzzwnpyupyzzzzzzzzzzzzzzud1000003ozzzzzzzzzzzztxzttyzzzzzzzzsuzxuzzzzzzzzzzzzzzzn40000001exzzzzzzzzzzzwyzvwzzzzzzzzzvwzzwzzzzzzzzzzzzzzyf100000006uzzzzzzzzzzzxyzxyzzzzzzzzzxyzzyzzzzzzzzzzzzzzx9000000002pzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzu4000002000kzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzp1000014000fzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzj0000014000ayzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyd00000020006wzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzxa10000000003tzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzu941000000001pzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzo641000000000lzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzh221110000000gzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyb010340000000byzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzzzyzzzw60005700000007xzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzyxwyxzt30008800000004vzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzwuuwuyq10008800000002ryzzzzyzzzzzzzzzzyzzzzzzzzzzzzzzyzzusvwsxn10007710000101lwzyzzyyyyzyzzzzzzzzzzzyzzzzyxyywzyutywtym00005720001201ftwvwxuuuvxvxyzyzzzyzzzxzyyxxstvsywuvzuqwk00005720002300blnlnqkjlqwrsvzvxwxwwxxtyywsvmnrqxtuwxokqh000067100012008ab8bf87ajtmjszqpoqqnpqlwxqmvjmrrxuvvtkhjc00006500000100532235124ari9ryiedggcdhfvvghujptuxxyuplgg8000053000000002000030224rc4sxb5577459cws8ftgotttxysnmjh6000052000000000000040112s83uv51232123byp5frelsrjqtmlllk6000041000000000000030002n52op301111018sk6fmdinm9efbcdgg4000010000000000000010001f41gh200000005je6cf9cdc687457aa20000000000000000000000007207810000000297257344445432455100000000000000000000000021022000000000220121101122111210000000","a":2.0,"f":0.18,"s":1.6},{"k":"sway","r":[8,8,551,340],"tw":6,"th":6,"g":"00000000000000000001211001000000000000000000000000000000000000000000000000000000000000000000000000000000000004gpll6493100000000000000000000000000000000000000000000000000000000000000000000000000000167dduzzwlokd40000000000000000000000000000000000000000000000000000000000000000000000000000005lwuyzzzwtmh40000000000000000000000000000000000000000000000000000000000000000000000000000003ozzzzzyspro50000000000000000000000000000000000000000000000000000000000000000100000100000013nzyywtvxyyr60000000000000000000000000000000000000000000000000000000000000004c40012200000165lyyxusvyyxq40000000000000000000000000000000000000000000000000000000000000008qjc7b600000016bkwwwxwvwtli30000000000000000000000000000000000000000000000000000000000000009rwwtvm50001599gotqvxwphdc81000000000000000000000000000000000000000000000000000000000000000asvyyyug102ervtrsvwxuplb2210000000000000000000000000000000000000000000000000000000000000000awxyyxse25guzzxrtxytng630000000000000000000000000000000000000000000000000000000000000000000awxuwyxnhqxzzyvuxyqa55400000000000000000000000000000000000000000000000000000000000000000000awxxxxyyyzzzzxvyywp8200000000000000000000000000000000000000000000000000000000000000000000009vwyyuwyyyzzwuwzyqn7100001000000000000000000000000000000000000000000000000000000000000000007uvyzxwvsxyywyzvrja3000000000000000000000000000000000000000000000000000000000000000000000003eeqzzwxxyywyzyk630000000010000000000000000000000000000000000000000000000000000000000000000011fxxwyzyyxyyta1000000000210000000000000000000000000000000000000000000000000000000000000000009iqwyzzxuvxvh20000000000000000000000000000000000000000000000000000000000000000000000000000028nxzyyyyyzzp50000000000000000000000000000000000000000000000000000003a3000000000000000000008pxzzzyyzvstn90000000000000000000000000000000000000000000000000000006qma31000000000000000005jyzzwwyyo87410000000000000000000000000000000000000000000000000000006tyvne71000000143351017cfvzyvxzyq40000210000000000000000000000000000000000000000000000000006sxxuob1000134comok3015gsyyuxytorb7434a93300000000000000000000000000000000000000000000000002bed94100233bmwyrvr6001hxzyuxyrgmjilfglpi6100000000000000000000000000000000000000000000000000000000025actzytxr7016fxzwuyzxtwtmuvxywl62100000000000000000000000000000000000000000000000000000000017jxzzwwq706pvzysuyzzzzxwwyzzvllk60000000000000000000000000000000000000000000000000000001318gszzzwvq619qxzwovzxxzzzzxxwxvnpr6000000000000000000000000000000000000000000000000000000124lwyzzzzxr62ctzzutwwxyzzyyyxxxxtgb20000000000000000000000000000000000000000000000000000001amuvyzzzzyr76otzztvwvuyyzyyyyzxywh820000000000000000000000000000000000000000000000000000002fvywyzyzxzr78pxzzxyyyyxxyywyzzyxulh40000000000000000000000000000000000000000000000000000001dszzzzyxyzr75pyyyxzyyxwwwuhnqrlhd661000000000000000000000000000000000000000000000000003511artyzzzzyzzr62jwyxxzvtldbdga675224100000000000000000000000000000000000000000000000000017g6dsywyyzzzzzyq64qvstwvkg6001120000001000000000000000000000000000000000000000000000000003bimfszywtoyzzzzzr64pytqupb7100000000000000000000000000000000000000000000000000000000000001dqvwuxxyyvqyzyzzyr67syvuvjc2000000000000000000000000000000000000000000000000000000000000002lxyyxyxxyzzzzzzzzq66nqquwi72100000110000000000000000000000000000000000000000000000000000003nyzzyyvtwzzzzzzzyn57oqhqxnb32592111000000000000000000000000000000000000000000000000000000018qxyyyywxyzyzzzzwl67uqosyxtkglrkg6100000000020000000000000000000000000000000000000000000001aljouvzzzyywyyyywq69wwxyzzzyxrtywha30000000000000000000000000000000000000000000000000000000256eprwyyxywxyzyyr7avyyyyyyyyvvzyj7200000000000000000000000000000000000000000000000000000000018bjovxxwvyyyyyq6avuvxxxwxywxywi4300000000000000000000000000000000000000000000000000000000001598lqyyyzyyyzr6atvyzzzzyyyxvwtj6000000000000000000000000000000000000000000000000000000000001238nyyzzzzyzq69qwzzzzzzxxyxwul4000000000000000000000000000000000000000000000000000000000000002hvxyyyuvyq68mxzzzzzwjpxuuqg61000000000000000000000000000000000000000000000000000000000000113gvvxxmoyr67oxyzzzwk6clnng6200000000000000000000000000000000000000000000000000000000000001003dimwriwr65rywwrnm40148750000000000000000000000000000000000000000000000000000000000000000000125ouhsr64syrg95710001100000000000000000000000000000000000000000000000000000000000000000000008qxsur66rxuk60000000000000000000000000000000000000000000000000000000000000000000000000000018pyxuo79utg720000000000001000000000000000000000000000000000000000000000000000002210000000016jvxuo79trj4000000000000220000000000000000000000000000000000000000000000000000023200100001678nwro67hb71000000000000000000000000000000000000000000000000000000000000000000135400000000214kusm535410000000000000000000000000000000000000000000000000000000000000000000036410000000001cvyp5100000000000000000010000000000000000000000000000000000000000000000000000398200000000006tyq6000000000000000000110000000000000000000000000000000000000000000000000000232000000000003glh400000000000000000000000000000000000000000000000000000000000000000000000000000000000000011100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000","a":3.2,"s":1.25,"ph":0.03}],"gl":[[452,324,5.4],[435,317,10.0],[450,323,10.0],[482,354,8.5],[449,313,11.4],[454,314,5.6],[470,353,10.8],[446,308,5.4],[438,324,11.7],[443,301,9.0],[444,301,8.9],[456,346,11.8],[218,312,10.3],[432,313,10.3],[451,324,4.4],[450,309,7.0],[458,308,4.7],[458,329,5.5],[449,314,5.7],[448,300,10.9],[450,346,5.0],[436,324,6.4],[454,301,7.9],[438,308,10.8],[445,308,11.7],[454,324,9.7],[452,330,5.7],[447,301,8.4],[517,364,9.6],[432,317,4.4],[447,315,9.4],[440,326,6.9],[438,300,8.7],[437,320,9.4],[433,317,9.4],[442,326,8.2],[445,314,8.4],[438,337,5.6],[452,329,8.0],[441,308,5.0],[450,300,7.8],[452,322,8.3],[440,329,10.2],[454,322,7.1],[452,311,4.2],[448,311,8.2],[449,300,5.6],[444,314,9.9],[443,311,7.1],[448,326,7.0],[434,312,11.3],[453,300,7.1],[442,346,6.8],[447,308,6.8],[437,324,7.8],[358,313,4.7],[443,326,8.4],[441,311,11.4],[428,337,8.5],[448,346,10.0]],"glow":[486,62,40]},"bookmark-sakura.png":{"fx":[{"k":"wave","r":[6,428,183,516],"tw":6,"th":2,"g":"000000000000000000000000000000121222111112111111112222111221254566445555555554446566443652385899788888788898879899576983495acc9cbbbbbbbccbbacacc899c935c7cffcffffffffffffdfdffcddfc47gbfihfiiiiiiiiiiiigifiihhhif58jchlkilllllllllllljkilljjili69kakonloooooooooooonnkonkkjnk79k8nrqorrrrrrrrrrrrqqmqqnomqo88m9qutquuuuuuuuuuuusrmqtstqtr97naqxvsxxxxxxxxxxxxrrlnwwxsvva7oaqzxuzzzzzzzzzzzzrpjhxzzuxxb5ncqzxvzzzzzzzzzzzzqmjewzzuxxb5ngqzyxzzzzzzzzzzzzsnmhwzzvxxb6oilyzyzzzzzzzzzzzzvrqmxzzwyyb9rhgxzzzzzzzzzzzzzzxurqyzzyzybbthhxzzzzzzzzzzzzzzwtrszzzzzybewkmxzzzzzzzzzzzzzzvtttzzzzzybgxnoxzzzzzzzzzzzzzzwuwvzzzyzybhyopxzzzzzzzzzzzzzzywyxzzzyzybhypryzzzzzzzzzzzzzzyxzyzzzzzybhyqtyzzzzzzzzzzzzzzywzzzzzzzybgxswyzzzzzzzzzzzzzzyuzzzzzzzybgyvyzzzzzzzzzzzzzzzytyyzzzzzybgxyzzzzzzzzzzzzzzzzysxxzzzzzybewzyzzzzzzzzzzzzzzzyrwvzzzzzybdvzyzzzzzzzzzzzzzzzyrwwzzzzzybfwzzzzzzzzzzzzzzzzzysxyzzzzzybgyzzzzzzzzzzzzzzzzzxryzzzzzzybhzzzzzzzzzzzzzzzzzzxqxzzzzzyybgzzzzzzzzzzzzzzzzzzxsxzzzzxvxbfyzzyzzzzzzzzzzzzzzyvwxzzzxtxbdxzxwzzzzzzzzzzzzzzzxuvzzzxuxbeyyuvzzzzzzzzzzzzzzzyuuzzzxvxbgywptzzzzzzzzzzzzzzzyutzzzyuxbhzumszzzzzzzzzzzzzzzwsqyzzxvxbgyupuzzzzzzzzzzzzzzzspqyzzuwxbfxvsuyzzzzzzzzzzzzzzpmtzzyswxbdxwqpwzzzzzzzzzzzzzzokvzzzvxxbcxwljtzzzzzzzzzzzyzzqkuyyywxybcvwkjszzzzzzzzzzzwyzrntxwwuvxbaikefjnnnnnnnnnnnlmmhhjljjjkna467556777777777777775667666775","a":1.8,"f":0.11,"s":0.9},{"k":"sway","r":[6,6,183,262],"tw":5,"th":5,"g":"4775110000000000000000000000000000003akjb91001100000000000000000000000003aloi9101882000000000000000000000000597889a32aa30000000000000000000000007ga45kpb54200000000000000000000000008sqe6ktnha310000000000000000000000006quodfmleca30000000000000000000000004owuqlc843410000000000000000000000007rvuuk97d6000000000000000000000000005qvuvqfdg8101100000000000000000000003hsrttnf620242000000000000000000000018hnrnf933421000000000000000000000002fjoun8117gb2000000000000000000000004jjdgh8302aa2000000000000000000000004841234200110000000000000000000000001100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000110000000000000000000000000000000001651000000000000000000000000000000001342000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000001610000000000000000000000000000000002610000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000023000000000000000000000000000000000067100000000000000000000000000000000112000000000000000000000000000000003710000000000000000000000000000000007j40000000000000000000000000000000005d30000000000000000000000000000000002421000000000000000000000000000000006a4420000000000000000000000000000000241210000000000000000000000000000000021000000000000000000000000000000000021000000000000000000000000000000000000000000000000000000000000000000000000000000000002100000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000","a":2.6,"s":0.7,"ph":0.02}],"gl":[[38,500,9.5],[40,475,10.2],[114,496,5.5],[107,482,7.7],[149,497,6.9],[30,476,5.4],[42,481,5.8],[39,476,11.7],[33,444,11.1],[41,467,7.1],[178,491,9.9],[104,486,4.3],[174,453,11.3],[145,496,8.3],[118,496,10.6],[66,502,6.2],[163,491,7.0],[144,472,6.8],[151,477,11.8],[134,506,7.4],[153,493,8.0],[88,487,11.6],[96,478,11.2],[43,494,7.2],[48,479,6.5],[84,482,10.5],[95,489,4.9],[56,482,7.1],[146,512,11.0],[146,481,11.3],[41,462,5.9],[110,484,4.6],[112,496,10.3],[79,480,9.0],[92,479,5.9],[173,445,8.0],[120,481,4.6],[30,462,9.6],[175,488,8.2],[149,482,9.6]],"glow":[152,127,34]},"marine.png":{"fx":[{"k":"wave","r":[8,248,551,300],"tw":10,"th":2,"g":"11111111111111111111111111111111111111111111111111111116666666666666666666666666666666666666666666666666666666bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggglllllllllllllllllllllllllllllllllllllllllllllllllllllllqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk9999999999999999999999999999999999999999999999999999999","a":2.0,"f":0.2,"s":1.4}]},"diwali.png":{"fx":[{"k":"rot","r":[36,20,104,140],"tw":4,"th":4,"g":"000000000000000000222222222222222114666666666666642269aaaaaaaaaaaa7327deeeeeeeeeeed9339ghhhhhhhhhhhhb43bjlllllllllllkd54dmooooooooooong64fpsssssssssssri75htvvvvvvvvvvvuk85jwyyyyyyyyyyyxm95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwzzzzzzzzzzzyn95jwyyyyyyyyyyyxn95innnnnnnnnnnnnl949999999999999997","a":3.0,"s":1.6,"p":[70,22]},{"k":"rot","r":[464,20,530,130],"tw":4,"th":4,"g":"000000000000000000222222222222221014666666666666531269aaaaaaaaaaa95227deeeeeeeeeeec6239ghhhhhhhhhhhf833bjlllllllllllh934dmoooooooooookb44fpsssssssssssnc45htvvvvvvvvvvvqe55jwyyyyyyyyyyytf55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jwzzzzzzzzzzzug55jtuuuuuuuuuuusg55fggggggggggggge545555555555555554","a":3.0,"s":1.6,"p":[497,22]}]}};
+  var CHW = '0123456789abcdefghijklmnopqrstuvwxyz';
+  function liveGrid(e) { if (!e._w) { e._w = []; for (var i = 0; i < e.g.length; i++) e._w.push(CHW.indexOf(e.g[i]) / 35); e._cols = Math.ceil((e.r[2] - e.r[0]) / e.tw); } return e._w; }
+  function warp(ctx, im, k, e, t) {
+    var w = liveGrid(e), cols = e._cols, x0 = e.r[0], y0 = e.r[1], x1 = e.r[2], y1 = e.r[3];
+    var ca = 0, sa = 0; if (e.k === 'rot') { var ang = e.a * Math.PI / 180 * (Math.sin(t * e.s) * 0.8 + Math.sin(t * e.s * 2.3) * 0.2); ca = Math.cos(ang); sa = Math.sin(ang); }
+    for (var i = 0; i < w.length; i++) {
+      var q = w[i]; if (q < 0.03) continue;
+      var x = x0 + (i % cols) * e.tw, y = y0 + Math.floor(i / cols) * e.th, tw = Math.min(e.tw, x1 - x), th = Math.min(e.th, y1 - y), dx = 0, dy = 0;
+      if (e.k === 'wave') { dx = e.a * q * (0.7 * Math.sin(t * e.s + y * e.f) + 0.3 * Math.sin(t * e.s * 0.53 + y * e.f * 2.3 + x * 0.02)); }
+      else if (e.k === 'sway') { var gust = 0.75 + 0.25 * Math.sin(t * 0.37); dx = e.a * q * gust * Math.sin(t * e.s + x * e.ph + y * e.ph * 0.7); dy = e.a * 0.35 * q * Math.sin(t * e.s * 1.3 + x * e.ph * 0.8); }
+      else { var rx = x - e.p[0], ry = y - e.p[1]; dx = q * ((rx * ca - ry * sa) - rx); dy = q * ((rx * sa + ry * ca) - ry); }
+      var sx = (x - dx) * k, sy = (y - dy) * k;
+      ctx.drawImage(im, sx, sy, tw * k, th * k, x, y, tw + 0.6, th + 0.6);
+    }
+  }
+  function baseImg(T) { var a = img('art/' + T.file.replace('.png', '.jpg')); return a || img('targets/' + T.file); }
+  function drawBase(ctx, T) { var im = baseImg(T); if (im) ctx.drawImage(im, 0, 0, T.w, T.h); return im; }
   function livePlate(ctx, t, T) {
     var L = LIVE[T.file]; if (!L) return;
-    var im = img('targets/' + T.file); if (!im) return;
-    var k = im.naturalWidth / T.w;
-    L.w.forEach(function (r) {
-      ctx.save(); ctx.beginPath(); ctx.rect(r[0], r[1], r[2] - r[0], r[3] - r[1]); ctx.clip();
-      for (var y = r[1]; y < r[3]; y += 1.5) {
-        var q = (y - r[1]) / (r[3] - r[1]), off = r[4] * (0.35 + 0.65 * q) * Math.sin(t * 1.7 + y * 0.42) + r[4] * 0.45 * Math.sin(t * 0.8 + y * 0.13);
-        ctx.drawImage(im, (r[0] - 6) * k, y * k, (r[2] - r[0] + 12) * k, 1.6 * k, r[0] - 6 + off, y, r[2] - r[0] + 12, 1.6);
-      }
-      ctx.restore();
+    var im = baseImg(T); if (!im) return; var k = im.naturalWidth / T.w;
+    L.fx.forEach(function (e) { warp(ctx, im, k, e, t); });
+  }
+  function liveGlints(ctx, t, T, col) {
+    var L = LIVE[T.file]; if (!L || !L.gl) return; var e = L.fx[0];
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    L.gl.forEach(function (g, i) {
+      var tw = Math.sin(t * (1.6 + (i % 5) * 0.35) + i * 2.1); if (tw < 0.2) return; var a = Math.pow((tw - 0.2) / 0.8, 2);
+      var x = g[0] + (e && e.k === 'wave' ? e.a * Math.sin(t * e.s + g[1] * e.f) : 0);
+      var gr = ctx.createRadialGradient(x, g[1], 0, x, g[1], g[2]); gr.addColorStop(0, 'rgba(' + col + ',' + (0.85 * a).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(' + col + ',0)');
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.ellipse(x, g[1], g[2], g[2] * 0.22, 0, 0, 6.283); ctx.fill();
+      if (a > 0.7) star4(ctx, x, g[1], 2 + 3 * a, '#FFFFFF', (a - 0.7) / 0.3 * 0.9);
     });
-    L.s.forEach(function (r, i) {
-      var a = r[6] * Math.PI / 180 * (Math.sin(t * 0.9 + i * 1.7) * 0.75 + Math.sin(t * 2.1 + i) * 0.25);
-      ctx.save(); ctx.beginPath(); ctx.rect(r[0] - 6, r[1] - 6, r[2] - r[0] + 12, r[3] - r[1] + 12); ctx.clip();
-      ctx.translate(r[4], r[5]); ctx.rotate(a); ctx.translate(-r[4], -r[5]);
-      ctx.drawImage(im, r[0] * k, r[1] * k, (r[2] - r[0]) * k, (r[3] - r[1]) * k, r[0], r[1], r[2] - r[0], r[3] - r[1]);
-      ctx.restore();
-    });
+    ctx.restore();
+  }
+  function liveGlow(ctx, t, T, rgb, amt) {
+    var L = LIVE[T.file]; if (!L || !L.glow) return; var c = L.glow, p = 0.5 + 0.5 * Math.sin(t * 0.9);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    var g = ctx.createRadialGradient(c[0], c[1], c[2] * 0.85, c[0], c[1], c[2] * (1.5 + 0.15 * p));
+    g.addColorStop(0, 'rgba(' + rgb + ',' + (amt * (0.6 + 0.4 * p)).toFixed(3) + ')'); g.addColorStop(1, 'rgba(' + rgb + ',0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(c[0], c[1], c[2] * 1.7, 0, Math.PI * 2); ctx.closePath(); ctx.moveTo(c[0] + c[2] * 0.97, c[1]); ctx.arc(c[0], c[1], c[2] * 0.97, 0, Math.PI * 2); ctx.closePath(); ctx.fill('evenodd'); ctx.restore();
   }
   function frameOf(T) {
     if (T.w === T.h) return null;
@@ -994,13 +1066,15 @@
   }
   var SIGPOS = {"moon.png": [333.44, 510.78, 48.0], "csmt.png": [495.44, 348.78, 48.0], "diwali.png": [495.44, 348.78, 48.0], "christmas.png": [495.44, 348.78, 48.0], "newyear.png": [495.44, 348.78, 48.0], "torii-portrait.png": [333.44, 510.78, 48.0], "torii-landscape.png": [495.44, 348.78, 48.0], "marine.png": [495.44, 348.78, 48.0], "csmt-hindi.png": [495.44, 348.78, 48.0], "winter.png": [495.44, 348.78, 48.0], "village-life.png": [333.44, 510.78, 48.0], "monsoon.png": [333.44, 510.78, 48.0], "village-hut.png": [333.44, 510.78, 48.0], "bookmark-sakura.png": [140.83, 529.86, 34.5], "bookmark-village.png": [140.83, 529.86, 34.5]}, SIGIMG = new Image(); SIGIMG.src = 'assets/signature.png';
   function drawAll(ctx, t, st, T) {
-    var F = frameOf(T);
-    if (F) { ctx.save(); ctx.beginPath(); ctx.rect(F.b, F.b, F.iw, F.ih); ctx.clip(); livePlate(ctx, t, T); ctx.translate(F.ox, F.oy); ctx.scale(F.s, F.s); }
-    drawCore(ctx, t, st, T);
-    if (F) { ctx.restore(); ctx.save(); ctx.beginPath(); ctx.rect(F.b, F.b, F.iw, F.ih); ctx.clip(); }
+    var F = frameOf(T), A = ANIMS[T.anim], base = drawBase(ctx, T);
+    if (F) { ctx.save(); ctx.beginPath(); ctx.rect(F.b, F.b, F.iw, F.ih); ctx.clip(); }
+    livePlate(ctx, t, T);
+    if (A.card) A.draw(ctx, t, st, T.w, T.h, T);
+    else { if (F) { ctx.save(); ctx.translate(F.ox, F.oy); ctx.scale(F.s, F.s); } drawCore(ctx, t, st, T); if (F) ctx.restore(); }
     if (T.fx && T.fx.glitter) glitter(ctx, t, st, T.w, T.h, T.m, T.fx.glitter);
     if (typeof popIn === 'function') popIn(ctx, t, T);
-    var sp = SIGPOS[T.file]; if (sp && SIGIMG.complete && SIGIMG.naturalWidth) ctx.drawImage(SIGIMG, sp[0], sp[1], sp[2], sp[2] * SIGIMG.naturalHeight / SIGIMG.naturalWidth);
+    var sp = SIGPOS[T.file], hasArt = base && /art\//.test(base.src);
+    if (sp && !hasArt && SIGIMG.complete && SIGIMG.naturalWidth) ctx.drawImage(SIGIMG, sp[0], sp[1], sp[2], sp[2] * SIGIMG.naturalHeight / SIGIMG.naturalWidth);
     if (F) ctx.restore();
   }
   function drawCore(ctx, t, st, T) {
@@ -1018,7 +1092,7 @@
   var MODE = 'flat';
   try { var saved = localStorage.getItem('dp-mode'); if (saved === '3d' || saved === 'flat') MODE = saved; } catch (e) {}
   function setMode(m) { MODE = m === '3d' ? '3d' : 'flat'; try { localStorage.setItem('dp-mode', MODE); } catch (e) {} return MODE; }
-  var FRAME = { moon: '#C9A65E', csmt: '#E2502E', csmtHindi: '#E2502E', diwali: '#FFC93C', christmas: '#D62828', newyear: '#6A4C9C', sakura: '#3A1F2E', stickerMumbai: '#FFC93C', stickerNavi: '#2FA84F', cat: '#FF9FBF', fah: '#FFFFFF', marine: '#FF8A5B', stickerDesigner: '#6A4C9C', winter: '#5BB6C9', bmMoon: '#C9A65E', bmVillage: '#7A5A3A', village: '#8A6038', nv: '#2A3A5A', vid: '#2A3A5A', monsoon: '#B44A2E' };
+  var FRAME = { moon: '#C9A65E', csmt: '#E2502E', csmtHindi: '#E2502E', diwali: '#FFC93C', christmas: '#D62828', newyear: '#6A4C9C', sakura: '#3A1F2E', stickerMumbai: '#FFC93C', stickerNavi: '#2FA84F', cat: '#FF9FBF', fah: '#FFFFFF', marine: '#FF8A5B', stickerDesigner: '#6A4C9C', winter: '#5BB6C9', bmMoon: '#C9A65E', bmVillage: '#7A5A3A', village: '#8A6038', nv: '#2A3A5A', vid: '#2A3A5A', monsoon: '#B44A2E', moonCard: '#C9A65E', sakuraCard: '#3A1F2E', bmSakura: '#3A1F2E' };
   function easeOutBack(x) { var c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); }
   function clamp01(x) { return Math.max(0, Math.min(1, x)); }
   if (window.AFRAME) {
@@ -1063,14 +1137,18 @@
           });
         }
         var anim = new THREE.Mesh(new THREE.PlaneGeometry(fw / T.w, fh / T.w), new THREE.MeshBasicMaterial({ map: this.tex, transparent: true, depthWrite: false, side: THREE.DoubleSide }));
-        anim.position.z = sticker ? 0.05 : 0.07; win.add(anim);
+        anim.position.z = sticker ? 0.05 : 0.07; anim.renderOrder = 10; win.add(anim);
+        /* same picture on the back of the window, so it shows from any viewing side */
+        var animBack = new THREE.Mesh(anim.geometry, new THREE.MeshBasicMaterial({ map: this.tex, transparent: true, depthWrite: false, side: THREE.FrontSide }));
+        animBack.rotation.y = Math.PI; animBack.position.z = sticker ? -0.03 : -0.05; animBack.renderOrder = 10; win.add(animBack);
 
         this.flat = flat; this.root = root; this.base = base; this.hinge = hinge; this.win = win; this.shadow = shadow; this.mode = null;
         this.el.setObject3D('mesh', holder);
-        this.A.init(this.st, T.w, T.h);
+        this.A.init(this.st, T.w, T.h); img('targets/' + T.file);
+        var artWanted = false;
         var target = this.el.parentNode;
-        target.addEventListener('targetFound', function () { self.active = true; self.t0 = performance.now(); self.mode = MODE; if (window.DPSound) window.DPSound.scene(T.sound || null); if (self.A.onFound) self.A.onFound(); var h = document.getElementById('hint'); if (h) h.hidden = true; });
-        target.addEventListener('targetLost', function () { self.active = false; if (window.DPSound) window.DPSound.scene(null); flat.visible = false; root.visible = false; var h = document.getElementById('hint'); if (h) h.hidden = false; });
+        target.addEventListener('targetFound', function () { clearTimeout(self.lostT); if (!artWanted) { artWanted = true; img('art/' + T.file.replace('.png', '.jpg')); } self.active = true; self.t0 = performance.now(); self.mode = MODE; if (window.DPSound) window.DPSound.scene(T.sound || null); if (self.A.onFound) self.A.onFound(); var h = document.getElementById('hint'); if (h) h.hidden = true; });
+        target.addEventListener('targetLost', function () { self.active = false; clearTimeout(self.lostT); self.lostT = setTimeout(function () { if (!self.active && window.DPSound) window.DPSound.scene(null); }, 1500); flat.visible = false; root.visible = false; var h = document.getElementById('hint'); if (h) h.hidden = false; });
       },
       tick: function () {
         if (!this.active) return;
@@ -1079,7 +1157,8 @@
         ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         if (MODE === 'flat') {
           this.root.visible = false; this.flat.visible = true;
-          ctx.setTransform(this.S, 0, 0, this.S, T.m * this.S, T.m * this.S); drawAll(ctx, t, this.st, T);
+          ctx.setTransform(this.S, 0, 0, this.S, T.m * this.S, T.m * this.S);
+          try { drawAll(ctx, t, this.st, T); } catch (e) { if (window.console) console.warn(e); }
         } else {
           this.flat.visible = false; this.root.visible = true;
           var pb = clamp01(t / 0.5), pw = clamp01((t - 0.35) / 1.05);
@@ -1089,20 +1168,23 @@
           var sc = 0.55 + 0.45 * easeOutBack(pw); this.win.scale.set(sc, sc, sc);
           this.win.rotation.y = pw >= 1 ? Math.sin(t * 0.7) * 0.06 : 0;
           this.shadow.material.opacity = 0.25 * pw;
-          if (t > 0.9) { ctx.setTransform(this.S, 0, 0, this.S, T.m * this.S, T.m * this.S); drawAll(ctx, t - 0.9, this.st, T); }
+          ctx.setTransform(this.S, 0, 0, this.S, T.m * this.S, T.m * this.S);
+          try { if (t > 0.9) drawAll(ctx, t - 0.9, this.st, T); else drawBase(ctx, T); } catch (e) { if (window.console) console.warn(e); }
         }
         this.tex.needsUpdate = true;
       }
     });
   }
 
-  function buildScene(holder, src) {
-    var ents = TARGETS.map(function (T, i) {
-      return '<a-entity mindar-image-target="targetIndex: ' + i + '"><a-entity dp-anim="index: ' + i + '" position="0 0 0.002"></a-entity></a-entity>';
+  function buildScene(holder, src, set) {
+    var n = 0, ents = TARGETS.map(function (T, i) {
+      if (set && T.set !== set) return '';
+      return '<a-entity mindar-image-target="targetIndex: ' + (n++) + '"><a-entity dp-anim="index: ' + i + '" position="0 0 0.002"></a-entity></a-entity>';
     }).join('');
-    holder.innerHTML = '<a-scene mindar-image="imageTargetSrc: ' + (src || './targets.mind') + '; maxTrack: 1; filterMinCF: 0.0001; filterBeta: 0.001" color-space="sRGB" renderer="colorManagement: true; alpha: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" embedded style="position:absolute;top:0;left:0;width:100%;height:100%">' +
+    holder.innerHTML = '<a-scene mindar-image="imageTargetSrc: ' + src + '; maxTrack: 1; filterMinCF: 0.0001; filterBeta: 0.001" color-space="sRGB" renderer="colorManagement: true; alpha: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" embedded style="position:absolute;top:0;left:0;width:100%;height:100%">' +
       '<a-camera position="0 0 0" look-controls="enabled: false"></a-camera><a-entity light="type: ambient; intensity: 0.9"></a-entity><a-entity light="type: directional; intensity: 0.8" position="0.5 1 1"></a-entity>' + ents + '</a-scene>';
   }
+  function targetsOf(set) { return TARGETS.filter(function (T) { return T.set === set; }); }
 
-  window.DPAR = { TARGETS: TARGETS, ANIMS: ANIMS, drawAll: drawAll, buildScene: buildScene, setMode: setMode, getMode: function () { return MODE; } };
+  window.DPAR = { TARGETS: TARGETS, targetsOf: targetsOf, ANIMS: ANIMS, drawAll: drawAll, buildScene: buildScene, setMode: setMode, getMode: function () { return MODE; } };
 })();
