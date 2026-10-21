@@ -41,9 +41,16 @@ document.getElementById('go').addEventListener('click', function () {
   document.getElementById('start').remove();
   document.getElementById('hint').hidden = false;
   if (window.DPSound) DPSound.unlock();
-  DPAR.buildScene(document.getElementById('scene-holder'));
+  var hint = document.getElementById('hint');
+  hint.textContent = 'Loading cards…';
+  fetch('./targets.mind', { method: 'HEAD', cache: 'no-store' }).then(function (r) {
+    if (!r.ok) { hint.textContent = 'targets.mind is missing – build it with make-targets.html and upload it to the repository.'; return; }
+    hint.textContent = 'Hold the card flat and fill the screen with it';
+    DPAR.buildScene(document.getElementById('scene-holder'));
+  }).catch(function () { hint.textContent = 'Could not load targets.mind – check your internet connection.'; });
   document.getElementById('modes').hidden = false;
   document.getElementById('sound').hidden = false;
+  return;
 });
 (function () {
   var box = document.getElementById('modes'), btns = box.querySelectorAll('button');
