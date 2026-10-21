@@ -78,12 +78,19 @@
     };
     loop();
   }
+  var SAMPLES = {};
+  function sample(url, cb) {
+    if (SAMPLES[url]) { if (SAMPLES[url].buf) cb(SAMPLES[url].buf); return; }
+    SAMPLES[url] = {}; fetch(url).then(function (r) { return r.arrayBuffer(); }).then(function (a) { return new Promise(function (ok, no) { ctx.decodeAudioData(a, ok, no); }); }).then(function (b) { SAMPLES[url].buf = b; cb(b); }).catch(function () {});
+  }
+  function playSample(url, vol) { sample(url, function (b) { if (!scene) return; var s = ctx.createBufferSource(), g = ctx.createGain(); g.gain.value = vol; s.buffer = b; s.connect(g); g.connect(master); s.start(); }); }
   function setScene(name) {
     if (name === scene) return;
     if (!ac()) return;
     stopAll(); scene = name || null;
     if (scene === 'monsoon') { rain(); flute(0.05, 7000); }
     if (scene === 'village') { flute(0.07, 3000); crickets(); }
+    if (scene === 'fah') { var loopF = function () { if (scene !== 'fah') return; playSample('assets/fahhh.mp3', 0.9); timers.push(setTimeout(loopF, 4500)); }; timers.push(setTimeout(loopF, 300)); }
   }
   function setEnabled(v) {
     on = !!v; try { localStorage.setItem('dp-sound', on ? 'on' : 'off'); } catch (e) {}
