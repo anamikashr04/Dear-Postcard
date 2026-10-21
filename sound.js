@@ -5,9 +5,21 @@
   try { on = localStorage.getItem('dp-sound') !== 'off'; } catch (e) {}
   function ac() {
     if (!ctx) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ctx = new C(); master = ctx.createGain(); master.gain.value = on ? 1 : 0; master.connect(ctx.destination); }
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx.state !== 'running') { try { ctx.resume(); } catch (e) {} }
     return ctx;
   }
+  /* iPhone: play even when the silent switch is on (Safari 17+) */
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+  var fahEl = null;
+  function unlock() {
+    var c = ac(); if (!c) return null;
+    try { var b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); } catch (e) {}
+    if (!fahEl) { fahEl = new Audio('assets/fahhh.mp3'); fahEl.preload = 'auto'; fahEl.setAttribute('playsinline', ''); fahEl.muted = true; var pr = fahEl.play(); if (pr && pr.then) pr.then(function () { fahEl.pause(); fahEl.currentTime = 0; fahEl.muted = false; }).catch(function () { fahEl.muted = false; }); else fahEl.muted = false; }
+    sample('assets/fahhh.mp3', function () {});
+    return c;
+  }
+  /* any tap re-wakes audio if the phone paused it */
+  ['touchend', 'click'].forEach(function (ev) { document.addEventListener(ev, function () { if (ctx && ctx.state !== 'running') { try { ctx.resume(); } catch (e) {} } }, true); });
   function noiseBuf(sec, pink) {
     var n = Math.floor(ctx.sampleRate * sec), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0), l = 0;
     for (var i = 0; i < n; i++) { var w = Math.random() * 2 - 1; l = pink ? (l * 0.97 + w * 0.03) * 1 : w; d[i] = pink ? l * 6 : w; }
@@ -80,16 +92,44 @@
   }
   var SAMPLES = {};
   function sample(url, cb) {
-    if (SAMPLES[url]) { if (SAMPLES[url].buf) cb(SAMPLES[url].buf); return; }
-    SAMPLES[url] = {}; fetch(url).then(function (r) { return r.arrayBuffer(); }).then(function (a) { return new Promise(function (ok, no) { ctx.decodeAudioData(a, ok, no); }); }).then(function (b) { SAMPLES[url].buf = b; cb(b); }).catch(function () {});
+    var e = SAMPLES[url];
+    if (e) { if (e.buf) cb(e.buf); else e.q.push(cb); return; }
+    e = SAMPLES[url] = { q: [cb] };
+    fetch(url).then(function (r) { return r.arrayBuffer(); }).then(function (a) { return new Promise(function (ok, no) { ctx.decodeAudioData(a, ok, no); }); })
+      .then(function (b) { e.buf = b; e.q.forEach(function (f) { f(b); }); e.q = []; }).catch(function () { delete SAMPLES[url]; });
   }
-  function playSample(url, vol) { sample(url, function (b) { if (!scene) return; var s = ctx.createBufferSource(), g = ctx.createGain(); g.gain.value = vol; s.buffer = b; s.connect(g); g.connect(master); s.start(); }); }
+  /* looping background song with a soft fade-in */
+  var MUSIC = { moon: 'assets/music-moon.mp3', sakura: 'assets/music-sakura.mp3' };
+  function music(name, vol) {
+    sample(MUSIC[name], function (b) {
+      if (scene !== name) return;
+      var s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = b; s.loop = true;
+      g.gain.setValueAtTime(0.0001, ctx.currentTime); g.gain.exponentialRampToValueAtTime(vol, ctx.currentTime + 2);
+      s.connect(g); g.connect(master); s.start(); nodes.push(s, g);
+    });
+  }
+  function preload(set) {
+    if (!ac()) return;
+    if (set === 'cards') { sample(MUSIC.moon, function () {}); sample(MUSIC.sakura, function () {}); }
+    if (set === 'bookmarks') sample(MUSIC.sakura, function () {});
+    if (set === 'stickers') sample('assets/fahhh.mp3', function () {});
+  }
+  function playSample(url, vol) {
+    if (!on) return;
+    var buf = SAMPLES[url] && SAMPLES[url].buf;
+    if (ctx && ctx.state === 'running' && buf) { var s = ctx.createBufferSource(), g = ctx.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g); g.connect(master); s.start(); return; }
+    /* fallback: plain audio element (primed on the Start tap) */
+    try { var el = fahEl || new Audio(url); el.currentTime = 0; el.volume = Math.min(1, vol); var p = el.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    if (ctx) sample(url, function () {});
+  }
   function setScene(name) {
     if (name === scene) return;
     if (!ac()) return;
     stopAll(); scene = name || null;
     if (scene === 'monsoon') { rain(); flute(0.05, 7000); }
     if (scene === 'village') { flute(0.07, 3000); crickets(); }
+    if (scene === 'moon') music('moon', 0.8);
+    if (scene === 'sakura') music('sakura', 0.8);
     if (scene === 'fah') { var loopF = function () { if (scene !== 'fah') return; playSample('assets/fahhh.mp3', 0.9); timers.push(setTimeout(loopF, 4500)); }; timers.push(setTimeout(loopF, 300)); }
   }
   function setEnabled(v) {
@@ -97,5 +137,5 @@
     if (ac()) master.gain.setTargetAtTime(on ? 1 : 0, ctx.currentTime, 0.1);
     return on;
   }
-  window.DPSound = { unlock: ac, scene: setScene, thunder: thunder, setEnabled: setEnabled, isOn: function () { return on; } };
+  window.DPSound = { unlock: unlock, preload: preload, scene: setScene, thunder: thunder, setEnabled: setEnabled, isOn: function () { return on; } };
 })();
