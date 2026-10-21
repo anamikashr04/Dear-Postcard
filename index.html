@@ -10,7 +10,7 @@
 <script src="./sound.js"></script>
 <script src="./ar.js"></script>
 <style>
-html,body{margin:0;height:100%;background:transparent;font-family:system-ui,sans-serif;overflow:hidden}
+html,body{margin:0;height:100%;background:#000;font-family:system-ui,sans-serif;overflow:hidden}
 #start{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#1d1a3a;color:#fff7e8;text-align:center;padding:24px}
 #start h1{margin:0;font-size:28px;font-weight:700}
 #start p{margin:0;max-width:300px;line-height:1.5;opacity:.85}
@@ -25,6 +25,8 @@ html,body{margin:0;height:100%;background:transparent;font-family:system-ui,sans
 #sound svg{width:24px;height:24px}
 #switch{position:fixed;top:16px;left:16px;z-index:16;height:48px;padding:0 16px;border:0;border-radius:999px;background:rgba(29,26,58,.75);color:#fff7e8;font:inherit;font-size:14px;font-weight:600;backdrop-filter:blur(6px)}
 #modes{top:72px!important}
+#spin{position:fixed;left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;z-index:9;border-radius:50%;border:12px solid rgba(40,40,40,.55);border-left-color:rgba(255,255,255,.9);animation:spin 1s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
 #hint{position:fixed;left:0;right:0;bottom:24px;z-index:10;text-align:center;color:#fff;font-size:15px;text-shadow:0 1px 4px #000;pointer-events:none}
 </style>
 </head>
@@ -39,6 +41,7 @@ html,body{margin:0;height:100%;background:transparent;font-family:system-ui,sans
 <div id="modes" role="group" aria-label="AR style" hidden><button type="button" data-mode="flat">Normal</button><button type="button" data-mode="3d">3D pop-up</button></div>
 <button id="sound" type="button" aria-label="Sound" aria-pressed="true" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path class="on" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"></path><path class="off" d="M16 9l5 6M21 9l-5 6" style="display:none"></path></svg></button>
 <button id="switch" type="button" hidden>Change</button>
+<div id="spin" hidden></div>
 <div id="hint" hidden>Hold the card flat and fill the screen with it</div>
 <div id="scene-holder"></div>
 <script>
@@ -46,11 +49,12 @@ var NAMES = { cards: 'postcard', bookmarks: 'bookmark', stickers: 'sticker' };
 function startSet(set) {
   document.getElementById('start').remove();
   document.getElementById('hint').hidden = false;
+  var spin = document.getElementById('spin'); spin.hidden = false;
   if (window.DPSound) { DPSound.unlock(); DPSound.preload(set); }
   var hint = document.getElementById('hint'), file = './targets-' + set + '.mind';
   hint.textContent = 'Loading…';
   fetch(file, { cache: 'force-cache' }).then(function (r) {
-    if (!r.ok) { hint.textContent = 'targets-' + set + '.mind is missing – build it with make-targets.html and upload it to the repository.'; return null; }
+    if (!r.ok) { spin.hidden = true; hint.textContent = 'targets-' + set + '.mind is missing – build it with make-targets.html and upload it to the repository.'; return null; }
     var total = +r.headers.get('content-length') || 0, got = 0, chunks = [], rd = r.body && r.body.getReader ? r.body.getReader() : null;
     if (!rd) return r.blob();
     return (function pump() { return rd.read().then(function (x) {
@@ -65,6 +69,8 @@ function startSet(set) {
     var sc = document.querySelector('#scene-holder a-scene'), ready = false;
     if (sc) {
       sc.addEventListener('arReady', function () { ready = true; });
+      sc.addEventListener('targetFound', function () { spin.hidden = true; });
+      sc.addEventListener('targetLost', function () { spin.hidden = false; });
       sc.addEventListener('arError', function () { hint.textContent = 'Camera could not start – allow camera access for this site (Settings → Safari → Camera → Allow), then tap Change.'; });
     }
     setTimeout(function () { if (!ready) hint.textContent = 'Still starting… if nothing happens, close other apps using the camera, open this link directly in Safari or Chrome (not inside WhatsApp/Instagram), and allow camera access.'; }, 15000);
