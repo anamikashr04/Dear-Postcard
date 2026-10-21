@@ -38,7 +38,7 @@ ul{padding-left:20px}
   });
   btn.addEventListener('click', async function () {
     btn.disabled = true; var msg = document.getElementById('msg'); msg.textContent = 'Building… keep this tab open (about 2–5 minutes).';
-    var MAX = 700;
+    var MAX = 480;
     var small = imgs.map(function (im) {
       var s = Math.min(1, MAX / Math.max(im.naturalWidth, im.naturalHeight));
       var c = document.createElement('canvas'); c.width = Math.round(im.naturalWidth * s); c.height = Math.round(im.naturalHeight * s);
@@ -56,7 +56,7 @@ ul{padding-left:20px}
     });
     var buf = await compiler.exportData();
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([buf])); a.download = 'targets.mind'; a.click();
-    msg.textContent = 'Done! targets.mind downloaded. Upload it to the main folder of your repository.';
+    msg.textContent = 'Done! targets.mind (' + (buf.byteLength / 1048576).toFixed(1) + ' MB) downloaded. Upload it to the main folder of your repository.';
     } catch (e) { msg.textContent = 'Error: ' + (e && e.message ? e.message : e) + ' (send a screenshot of this)'; msg.style.color = '#b3261e'; btn.disabled = false; }
   });
 })();
