@@ -14,6 +14,7 @@ html,body{margin:0;height:100%;background:transparent;font-family:system-ui,sans
 #start{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#1d1a3a;color:#fff7e8;text-align:center;padding:24px}
 #start h1{margin:0;font-size:28px;font-weight:700}
 #start p{margin:0;max-width:300px;line-height:1.5;opacity:.85}
+#start .pick{display:flex;flex-direction:column;gap:12px;width:100%;max-width:260px}
 #start button{font:inherit;font-size:18px;font-weight:600;padding:14px 32px;border:0;border-radius:999px;background:#ffc93c;color:#1d1d1b}
 #scene-holder{position:fixed;top:0;left:0;width:100vw;height:100vh;overflow:hidden}
 #scene-holder video{object-fit:cover}
@@ -22,45 +23,52 @@ html,body{margin:0;height:100%;background:transparent;font-family:system-ui,sans
 #modes button[aria-pressed="true"]{background:#ffc93c;color:#1d1d1b}
 #sound{position:fixed;top:16px;right:16px;z-index:16;width:48px;height:48px;border:0;border-radius:999px;background:rgba(29,26,58,.75);color:#fff7e8;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
 #sound svg{width:24px;height:24px}
+#switch{position:fixed;top:16px;left:16px;z-index:16;height:48px;padding:0 16px;border:0;border-radius:999px;background:rgba(29,26,58,.75);color:#fff7e8;font:inherit;font-size:14px;font-weight:600;backdrop-filter:blur(6px)}
+#modes{top:72px!important}
 #hint{position:fixed;left:0;right:0;bottom:24px;z-index:10;text-align:center;color:#fff;font-size:15px;text-shadow:0 1px 4px #000;pointer-events:none}
 </style>
 </head>
 <body>
 <div id="start">
 <h1>Dear Postcard</h1>
-<p>Point your camera at the front of your postcard or sticker and watch it come alive. Switch between <b>Normal</b> and <b>3D pop-up</b> at the top, and tap the speaker to turn sound on or off.</p>
-<button id="go" type="button">Start camera</button>
+<p>What are you scanning? Then point your camera at its front and watch it come alive.</p>
+<div class="pick"><button type="button" data-set="cards">Postcard</button><button type="button" data-set="bookmarks">Bookmark</button><button type="button" data-set="stickers">Sticker</button></div>
+<p style="font-size:14px">Switch between <b>Normal</b> and <b>3D pop-up</b> at the top, and tap the speaker for sound.</p>
 <p style="font-size:13px">by Anamika Shrivastava</p>
 </div>
 <div id="modes" role="group" aria-label="AR style" hidden><button type="button" data-mode="flat">Normal</button><button type="button" data-mode="3d">3D pop-up</button></div>
 <button id="sound" type="button" aria-label="Sound" aria-pressed="true" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path class="on" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"></path><path class="off" d="M16 9l5 6M21 9l-5 6" style="display:none"></path></svg></button>
+<button id="switch" type="button" hidden>Change</button>
 <div id="hint" hidden>Hold the card flat and fill the screen with it</div>
 <div id="scene-holder"></div>
 <script>
-document.getElementById('go').addEventListener('click', function () {
+var NAMES = { cards: 'postcard', bookmarks: 'bookmark', stickers: 'sticker' };
+function startSet(set) {
   document.getElementById('start').remove();
   document.getElementById('hint').hidden = false;
-  if (window.DPSound) DPSound.unlock();
-  var hint = document.getElementById('hint');
-  hint.textContent = 'Loading cards…';
-  fetch('./targets.mind', { cache: 'force-cache' }).then(function (r) {
-    if (!r.ok) { hint.textContent = 'targets.mind is missing – build it with make-targets.html and upload it to the repository.'; return null; }
+  if (window.DPSound) { DPSound.unlock(); DPSound.preload(set); }
+  var hint = document.getElementById('hint'), file = './targets-' + set + '.mind';
+  hint.textContent = 'Loading…';
+  fetch(file, { cache: 'force-cache' }).then(function (r) {
+    if (!r.ok) { hint.textContent = 'targets-' + set + '.mind is missing – build it with make-targets.html and upload it to the repository.'; return null; }
     var total = +r.headers.get('content-length') || 0, got = 0, chunks = [], rd = r.body && r.body.getReader ? r.body.getReader() : null;
     if (!rd) return r.blob();
     return (function pump() { return rd.read().then(function (x) {
       if (x.done) return new Blob(chunks);
       chunks.push(x.value); got += x.value.length;
-      hint.textContent = 'Loading cards… ' + (total ? Math.round(got / total * 100) + '%' : (got / 1048576).toFixed(1) + ' MB');
+      hint.textContent = 'Loading… ' + (total ? Math.round(got / total * 100) + '%' : (got / 1048576).toFixed(1) + ' MB');
       return pump(); }); })();
   }).then(function (blob) {
     if (!blob) return;
-    hint.textContent = 'Point at a card – hold it flat and fill the screen with it';
-    DPAR.buildScene(document.getElementById('scene-holder'), URL.createObjectURL(blob));
-  }).catch(function () { hint.textContent = 'Could not load targets.mind – check your internet connection.'; });
+    hint.textContent = 'Point at your ' + NAMES[set] + ' – hold it flat and fill the screen with it';
+    DPAR.buildScene(document.getElementById('scene-holder'), URL.createObjectURL(blob), set);
+  }).catch(function () { hint.textContent = 'Could not load – check your internet connection.'; });
   document.getElementById('modes').hidden = false;
   document.getElementById('sound').hidden = false;
-  return;
-});
+  document.getElementById('switch').hidden = false;
+}
+document.querySelectorAll('#start .pick button').forEach(function (b) { b.addEventListener('click', function () { startSet(b.dataset.set); }); });
+document.getElementById('switch').addEventListener('click', function () { location.reload(); });
 (function () {
   var box = document.getElementById('modes'), btns = box.querySelectorAll('button');
   function paint() { btns.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.mode === DPAR.getMode() ? 'true' : 'false'); }); }
