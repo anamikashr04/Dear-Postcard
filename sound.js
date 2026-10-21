@@ -8,14 +8,9 @@
     if (ctx.state !== 'running') { try { ctx.resume(); } catch (e) {} }
     return ctx;
   }
-  /* iPhone: play even when the silent switch is on (Safari 17+) */
-  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
-  var fahEl = null;
   function unlock() {
     var c = ac(); if (!c) return null;
     try { var b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); } catch (e) {}
-    if (!fahEl) { fahEl = new Audio('assets/fahhh.mp3'); fahEl.preload = 'auto'; fahEl.setAttribute('playsinline', ''); fahEl.muted = true; var pr = fahEl.play(); if (pr && pr.then) pr.then(function () { fahEl.pause(); fahEl.currentTime = 0; fahEl.muted = false; }).catch(function () { fahEl.muted = false; }); else fahEl.muted = false; }
-    sample('assets/fahhh.mp3', function () {});
     return c;
   }
   /* any tap re-wakes audio if the phone paused it */
@@ -117,10 +112,10 @@
   function playSample(url, vol) {
     if (!on) return;
     var buf = SAMPLES[url] && SAMPLES[url].buf;
-    if (ctx && ctx.state === 'running' && buf) { var s = ctx.createBufferSource(), g = ctx.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g); g.connect(master); s.start(); return; }
-    /* fallback: plain audio element (primed on the Start tap) */
-    try { var el = fahEl || new Audio(url); el.currentTime = 0; el.volume = Math.min(1, vol); var p = el.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
-    if (ctx) sample(url, function () {});
+    if (!ctx) return;
+    if (ctx.state !== 'running') { try { ctx.resume(); } catch (e) {} }
+    if (buf) { var s = ctx.createBufferSource(), g = ctx.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g); g.connect(master); s.start(); return; }
+    sample(url, function () {});
   }
   function setScene(name) {
     if (name === scene) return;
