@@ -489,6 +489,7 @@
   };
   /* ---- layered scenes: a clean plate + sprites that move ---- */
   var IMGS = {};
+  function loadPic(src) { return img(src); }
   function img(src) { var im = IMGS[src]; if (!im) { im = IMGS[src] = new Image(); im.src = src; } return im.complete && im.naturalWidth ? im : null; }
   function spr(ctx, src, m, dx, dy, rot, sx, sy, ox, oy) {
     var im = img(src); if (!im) return;
@@ -1033,7 +1034,7 @@
     }
   }
   function baseImg(T) { var a = img('art/' + T.file.replace('.png', '.jpg')); return a || img('targets/' + T.file); }
-  function drawBase(ctx, T) { var im = baseImg(T); if (im) ctx.drawImage(im, 0, 0, T.w, T.h); return im; }
+  function drawBase(ctx, T) { if (T.w === T.h) return null; var im = baseImg(T); if (im) ctx.drawImage(im, 0, 0, T.w, T.h); return im; }
   function livePlate(ctx, t, T) {
     var L = LIVE[T.file]; if (!L) return;
     var im = baseImg(T); if (!im) return; var k = im.naturalWidth / T.w;
@@ -1144,10 +1145,10 @@
 
         this.flat = flat; this.root = root; this.base = base; this.hinge = hinge; this.win = win; this.shadow = shadow; this.mode = null;
         this.el.setObject3D('mesh', holder);
-        this.A.init(this.st, T.w, T.h); img('targets/' + T.file);
+        this.A.init(this.st, T.w, T.h); loadPic('targets/' + T.file);
         var artWanted = false;
         var target = this.el.parentNode;
-        target.addEventListener('targetFound', function () { clearTimeout(self.lostT); if (!artWanted) { artWanted = true; img('art/' + T.file.replace('.png', '.jpg')); } self.active = true; self.t0 = performance.now(); self.mode = MODE; if (window.DPSound) window.DPSound.scene(T.sound || null); if (self.A.onFound) self.A.onFound(); var h = document.getElementById('hint'); if (h) h.hidden = true; });
+        target.addEventListener('targetFound', function () { clearTimeout(self.lostT); if (!artWanted) { artWanted = true; loadPic('art/' + T.file.replace('.png', '.jpg')); } self.active = true; self.t0 = performance.now(); self.mode = MODE; if (window.DPSound) window.DPSound.scene(T.sound || null); if (self.A.onFound) self.A.onFound(); var h = document.getElementById('hint'); if (h) h.hidden = true; });
         target.addEventListener('targetLost', function () { self.active = false; clearTimeout(self.lostT); self.lostT = setTimeout(function () { if (!self.active && window.DPSound) window.DPSound.scene(null); }, 1500); flat.visible = false; root.visible = false; var h = document.getElementById('hint'); if (h) h.hidden = false; });
       },
       tick: function () {
